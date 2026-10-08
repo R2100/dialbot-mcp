@@ -3,7 +3,7 @@
     "servers": {
       "dialbot-mcp": {
         "type": "local",
-        "command": ["node", "<ruta-del-proyecto>/src/mcp.mjs"],
+        "command": ["node", "<project-path>/src/mcp.mjs"],
         "protocol": "legacy"
       }
     }
