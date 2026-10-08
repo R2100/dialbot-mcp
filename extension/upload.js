@@ -17,15 +17,15 @@ export async function upload(cdp, name, args, context) {
   if (name === 'browser_upload') {
     const {root} = await cdp(tabId, 'DOM.getDocument');
     const {nodeIds} = await cdp(tabId, 'DOM.querySelectorAll', {nodeId: root.nodeId, selector: args.selector});
-    if (nodeIds.length !== 1) throw new Error(`El selector debe identificar un campo; encontrados: ${nodeIds.length}`);
+    if (nodeIds.length !== 1) throw new Error(`The selector must match a single field; found: ${nodeIds.length}`);
     const {node} = await cdp(tabId, 'DOM.describeNode', {nodeId: nodeIds[0]});
     const attributes = new Map();
     for (let i = 0; i < (node.attributes?.length ?? 0); i += 2) attributes.set(node.attributes[i], node.attributes[i + 1]);
-    if (node.nodeName !== 'INPUT' || attributes.get('type')?.toLowerCase() !== 'file') throw new Error('Se requiere input de tipo file');
+    if (node.nodeName !== 'INPUT' || attributes.get('type')?.toLowerCase() !== 'file') throw new Error('A file input is required');
     // :disabled includes inherited fieldset restrictions.
     const {nodeIds: disabled} = await cdp(tabId, 'DOM.querySelectorAll', {nodeId: root.nodeId, selector: 'input[type="file"]:disabled'});
-    if (disabled.includes(node.nodeId)) throw new Error('Campo deshabilitado');
-    if (files.length > 1 && !attributes.has('multiple')) throw new Error('El campo no admite varios archivos');
+    if (disabled.includes(node.nodeId)) throw new Error('Field is disabled');
+    if (files.length > 1 && !attributes.has('multiple')) throw new Error('The field does not support multiple files');
     target = {nodeId: node.nodeId};
     await cdp(tabId, 'DOM.setFileInputFiles', {...target, files});
   } else {
@@ -43,8 +43,8 @@ export async function upload(cdp, name, args, context) {
       await cdp(tabId, 'Page.setInterceptFileChooserDialog', {enabled: true});
       await input(cdp, 'browser_mouse_click', {tabId, x: args.x, y: args.y}, context);
       const opened = await chooser;
-      if (!opened?.backendNodeId) throw new Error('No se abrió un selector de archivo compatible; comprueba la página antes de repetir');
-      if (files.length > 1 && opened.mode !== 'selectMultiple') throw new Error('El selector no admite varios archivos');
+      if (!opened?.backendNodeId) throw new Error('No compatible file chooser opened; check the page before retrying');
+      if (files.length > 1 && opened.mode !== 'selectMultiple') throw new Error('The chooser does not support multiple files');
       target = {backendNodeId: opened.backendNodeId};
       await cdp(tabId, 'DOM.setFileInputFiles', {...target, files});
     } finally {
@@ -53,5 +53,5 @@ export async function upload(cdp, name, args, context) {
       await cdp(tabId, 'Page.setInterceptFileChooserDialog', {enabled: false});
     }
   }
-  return {selectionSent: true, count: files.length, names: files.map(path => path.split(/[\\/]/).pop()), uploadComplete: 'unknown', note: 'Comprueba la vista previa y el progreso en la página. No se ha pulsado ningún botón de publicación.'};
+  return {selectionSent: true, count: files.length, names: files.map(path => path.split(/[\\/]/).pop()), uploadComplete: 'unknown', note: 'Check the preview and progress on the page. No publish button was pressed.'};
 }

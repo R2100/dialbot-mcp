@@ -17,7 +17,7 @@ test('Native framing supports split headers, unicode and consecutive messages', 
   const buffer = Buffer.concat([nativeFrame({text: 'España 🌍'}), nativeFrame({id: 2})]);
   for (const byte of buffer) decode(Buffer.from([byte]));
   assert.deepEqual(messages, [{text: 'España 🌍'}, {id: 2}]);
-  assert.throws(() => decode(Buffer.from([255, 255, 255, 255])), /grande/);
+  assert.throws(() => decode(Buffer.from([255, 255, 255, 255])), /too large/);
 });
 test('Tool validation rejects unknown operations and malformed arguments', () => {
   assert.equal(tools.length, 27);
@@ -26,10 +26,10 @@ test('Tool validation rejects unknown operations and malformed arguments', () =>
   assert.ok(!availableTools('normal').some(tool => tool.name === 'browser_read'));
   assert.equal(availableTools('dom').length, 27);
   assert.throws(() => validate('browser_mode', {mode: 'stealth'}));
-  assert.throws(() => validate('browser_batch', {steps: [{name: 'browser_batch', arguments: {steps: [{name: 'browser_click', arguments: {tabId: 1, selector: '#x'}}]}}]}), /Paso no permitido/);
-  assert.throws(() => validate('browser_batch', {steps: [{name: 'browser_screenshot', arguments: {tabId: 1}}]}), /Paso no permitido/);
-  assert.throws(() => validate('browser_batch', {steps: [{name: 'browser_fill', arguments: {tabId: 1}}]}), /Falta selector|Falta text/);
-  assert.throws(() => validate('browser_batch', {steps: [{name: 'unknown_tool'}]}), /Paso no permitido/);
+  assert.throws(() => validate('browser_batch', {steps: [{name: 'browser_batch', arguments: {steps: [{name: 'browser_click', arguments: {tabId: 1, selector: '#x'}}]}}]}), /Step not allowed/);
+  assert.throws(() => validate('browser_batch', {steps: [{name: 'browser_screenshot', arguments: {tabId: 1}}]}), /Step not allowed/);
+  assert.throws(() => validate('browser_batch', {steps: [{name: 'browser_fill', arguments: {tabId: 1}}]}), /Missing selector|Missing text/);
+  assert.throws(() => validate('browser_batch', {steps: [{name: 'unknown_tool'}]}), /Step not allowed/);
   assert.throws(() => validate('browser_batch', {steps: Array.from({length: 21}, () => ({name: 'browser_tabs'}))}));
   validate('browser_batch', {steps: [{name: 'browser_fill', arguments: {tabId: 1, selector: 'input', text: 'x'}, pauseMs: 300}, {name: 'browser_click', arguments: {tabId: 1, selector: '#send'}}], stopOnError: false});
   assert.throws(() => validate('browser_mouse_click', {tabId: 1, x: NaN, y: 0}));
@@ -70,7 +70,7 @@ test('MCP initializes, lists tools, handles malformed JSON and validates calls',
   assert.equal(responses[4].error.code, -32601);
   assert.equal(responses[5].result.isError, true);
   assert.equal(responses[6].error.code, -32602);
-  assert.match(responses[6].error.message, /Paso no permitido/);
+  assert.match(responses[6].error.message, /Step not allowed/);
   assert.deepEqual(JSON.parse(responses[7].result.content[0].text), {running: false, totalSteps: 0, stepIndex: 0, cancelled: false, results: []});
   assert.ok(JSON.parse(responses[8].result.content[0].text).running === false);
 });
@@ -92,7 +92,7 @@ test('Modes switch in one session, preserve the catalog and isolate other client
   const first = client(), second = client();
   for (const rpc of [first, second]) {
     const initialized = await rpc('initialize', {protocolVersion: '2025-11-25'});
-    assert.match(initialized.result.instructions, /Modo inicial: fast/);
+    assert.match(initialized.result.instructions, /Initial mode: fast/);
   }
   const change = (rpc, args = {}) => rpc('tools/call', {name: 'browser_mode', arguments: args});
   const value = response => JSON.parse(response.result.content[0].text);
@@ -110,7 +110,7 @@ test('Modes switch in one session, preserve the catalog and isolate other client
   assert.equal(value(await settings(second)).effective.warmup, false);
   const blocked = await first('tools/call', {name: 'browser_fill', arguments: {tabId: 1, selector: 'input', text: 'x'}});
   assert.equal(blocked.result.isError, true);
-  assert.match(blocked.result.content[0].text, /bloqueada en modo normal/);
+  assert.match(blocked.result.content[0].text, /blocked in normal mode/);
   assert.deepEqual((await first('tools/list')).result, catalog.result);
   assert.equal(value(await change(second)).mode, 'fast');
   assert.equal((await change(first, {mode: 'invalid'})).error.code, -32602);
@@ -146,7 +146,7 @@ test('Batch runs steps with pauses, supports status and cancel over a fake pipe 
         try {request = JSON.parse(line);} catch {socket.end(); return;}
         if (request.token !== 'batch-token') {socket.end(); return;}
         seen.push(request);
-        if (refuse) {socket.end(JSON.stringify({id: request.id, error: 'Puente no disponible (ECONNREFUSED). Carga la extensión y pulsa Conectar.'}) + '\n'); return;}
+        if (refuse) {socket.end(JSON.stringify({id: request.id, error: 'Bridge unavailable (ECONNREFUSED). Load the extension and press Conectar (Connect).'}) + '\n'); return;}
         const result = request.name === 'browser_read' ? {text: 'paso-' + request.arguments.maxChars} : {done: request.name};
         setTimeout(() => socket.end(JSON.stringify({id: request.id, result}) + '\n'), 20);
       }
@@ -192,7 +192,7 @@ test('Batch runs steps with pauses, supports status and cancel over a fake pipe 
   ]}}));
   assert.equal(down.results.length, 1);
   assert.equal(down.results[0].ok, false);
-  assert.match(down.results[0].error, /Puente no disponible/);
+  assert.match(down.results[0].error, /Bridge unavailable/);
   assert.equal(down.stoppedOn, 0);
   refuse = false;
 

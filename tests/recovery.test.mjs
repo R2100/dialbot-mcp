@@ -33,7 +33,7 @@ test('A stalled CDP movement releases the button and frees the tab for subsequen
     t.mock.timers.tick(50);
   }
   await job;
-  assert.match(outcome.error.message, /Chrome no respondió a Input.dispatchMouseEvent/);
+  assert.match(outcome.error.message, /Chrome did not respond to Input.dispatchMouseEvent/);
   assert.ok(events.some(params => params.type === 'mouseReleased' && params.buttons === 0));
   assert.deepEqual(await execute('browser_mouse_move', {tabId: 70, x: 300, y: 40, durationMs: 0}), {moved: true});
 });

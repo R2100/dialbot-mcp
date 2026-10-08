@@ -16,14 +16,14 @@ async function cdp(tabId, method, params = {}) {
   try {
     return await Promise.race([
       chrome.debugger.sendCommand({tabId}, method, params),
-      new Promise((resolve, reject) => {timer = setTimeout(() => reject(new Error(`Chrome no respondió a ${method}; comprueba el navegador antes de repetir.`)), 5000);})
+      new Promise((resolve, reject) => {timer = setTimeout(() => reject(new Error(`Chrome did not respond to ${method}; check the browser before retrying.`)), 5000);})
     ]);
   } finally {clearTimeout(timer);}
 }
 const tabInfo = tab => ({tabId: tab.id, title: tab.title, url: tab.url, active: tab.active, windowId: tab.windowId});
 function navigationUrl(value) {
   const url = new URL(value);
-  if (!['http:', 'https:'].includes(url.protocol) && value !== 'about:blank') throw new Error('Solo navegación web o about:blank');
+  if (!['http:', 'https:'].includes(url.protocol) && value !== 'about:blank') throw new Error('Only web navigation or about:blank');
   return value;
 }
 async function navigate(tabId, url) {
@@ -43,7 +43,7 @@ async function navigate(tabId, url) {
       chrome.tabs.update(tabId, {url}),
       dialog.then(result => {
         if (result.error) throw result.error;
-        throw new Error('Navegación cancelada: la página tiene cambios sin guardar. Limpia o descarta el borrador antes de navegar.');
+        throw new Error('Navigation cancelled: the page has unsaved changes. Clear or discard the draft before navigating.');
       })
     ]);
     const result = await Promise.race([
@@ -51,7 +51,7 @@ async function navigate(tabId, url) {
       new Promise(resolve => {timer = setTimeout(() => resolve(null), 500);})
     ]);
     if (result?.error) throw result.error;
-    if (result?.dismissed) throw new Error('Navegación cancelada: la página tiene cambios sin guardar. Limpia o descarta el borrador antes de navegar.');
+    if (result?.dismissed) throw new Error('Navigation cancelled: the page has unsaved changes. Clear or discard the draft before navigating.');
     return tabInfo(updated);
   } finally {
     clearTimeout(timer);
@@ -65,9 +65,9 @@ async function dom(tabId, operation, args, showCursor = false) {
       try {
       if (operation === 'read') return {title: document.title, url: location.href, text: document.body.innerText.slice(0, args.maxChars ?? 20000)};
       const nodes = document.querySelectorAll(args.selector);
-      if (nodes.length !== 1) throw new Error(`El selector debe identificar un elemento; encontrados: ${nodes.length}`);
+      if (nodes.length !== 1) throw new Error(`The selector must match a single element; found: ${nodes.length}`);
       const element = nodes[0];
-      if (element.disabled || !element.getClientRects().length) throw new Error('Elemento oculto o deshabilitado');
+      if (element.disabled || !element.getClientRects().length) throw new Error('Element is hidden or disabled');
       element.scrollIntoView({block: 'center'});
       if (showCursor) {
         const rect = element.getBoundingClientRect();
@@ -75,7 +75,7 @@ async function dom(tabId, operation, args, showCursor = false) {
       }
       if (operation === 'click') { element.click(); return {clicked: true}; }
       if (operation === 'fill') {
-        if (!['INPUT', 'TEXTAREA'].includes(element.tagName) || element.readOnly || ['file', 'checkbox', 'radio', 'button', 'submit'].includes(element.type)) throw new Error('Se requiere un campo de texto editable');
+        if (!['INPUT', 'TEXTAREA'].includes(element.tagName) || element.readOnly || ['file', 'checkbox', 'radio', 'button', 'submit'].includes(element.type)) throw new Error('An editable text field is required');
         const prototype = element.tagName === 'INPUT' ? HTMLInputElement.prototype : HTMLTextAreaElement.prototype;
         Object.getOwnPropertyDescriptor(prototype, 'value').set.call(element, args.text);
         element.dispatchEvent(new Event('input', {bubbles: true}));
@@ -88,11 +88,11 @@ async function dom(tabId, operation, args, showCursor = false) {
   });
   if (results[0]?.error) throw new Error(results[0].error.message);
   if (results[0]?.result?.operationError) throw new Error(results[0].result.operationError);
-  if (results[0]?.result === undefined) throw new Error('La operación DOM no devolvió resultado');
+  if (results[0]?.result === undefined) throw new Error('The DOM operation did not return a result');
   return results[0].result;
 }
 export async function execute(name, args, context = {}) {
-  if (args.tabId !== undefined && busy.has(args.tabId)) throw new Error('Pestaña ocupada; espera a que termine la operación anterior');
+  if (args.tabId !== undefined && busy.has(args.tabId)) throw new Error('Tab busy; wait for the previous operation to finish');
   if (args.tabId !== undefined) busy.add(args.tabId);
   try {
     let cursorWarning;
@@ -109,7 +109,7 @@ async function executeAction(name, args, context) {
   switch (name) {
     case 'browser_file_inputs': {
       const results = await chrome.scripting.executeScript({target: {tabId: args.tabId}, func: fileInputs});
-      if (!results[0]?.result) throw new Error('No se pudieron listar los campos');
+      if (!results[0]?.result) throw new Error('Could not list the fields');
       return {inputs: results[0].result};
     }
     case 'browser_upload':
@@ -122,7 +122,7 @@ async function executeAction(name, args, context) {
     }
     case 'browser_outline': {
       const results = await chrome.scripting.executeScript({target: {tabId: args.tabId}, func: outline, args: [args]});
-      if (!results[0]?.result) throw new Error('No se pudo obtener el listado');
+      if (!results[0]?.result) throw new Error('Could not get the outline');
       return results[0].result;
     }
     case 'browser_warmup':
@@ -146,6 +146,6 @@ async function executeAction(name, args, context) {
       return {...capture, viewport: {width: cssVisualViewport.clientWidth, height: cssVisualViewport.clientHeight}, coordinateSystem: 'CSS pixels relative to visible viewport'};
     }
     case 'browser_detach': if (attached.has(args.tabId)) await chrome.debugger.detach({tabId: args.tabId}); attached.delete(args.tabId); return {detached: true};
-    default: throw new Error('Herramienta desconocida');
+    default: throw new Error('Unknown tool');
   }
 }

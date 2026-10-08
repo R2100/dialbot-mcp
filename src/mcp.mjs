@@ -17,7 +17,7 @@ async function syncCursor() {
   }
   return warnings;
 }
-const instructions = 'Usa browser_mode para consultar o cambiar de modo cuando el usuario lo pida. fast prioriza lectura DOM y acciones por selectores, sin capturas innecesarias. normal requiere capturas, ratón y teclado para leer e interactuar con el contenido; bloquea las herramientas DOM. No cambies de normal a fast por iniciativa propia para sortear un error. El modo pertenece a esta conexión MCP; las pestañas se conservan. normal no garantiza indetectabilidad y no revierte las acciones anteriores. Con browser_batch encadena solo acciones ya verificadas esta sesión, con pausas razonables en pauseMs: es para repetir flujos estables, no para explorar; su cadencia mecánica es observable por la página y no garantiza indetectabilidad. Controla el progreso con browser_batch_status y cancela con browser_batch_cancel.';
+const instructions = 'Use browser_mode to query or switch modes when the user asks. fast prioritizes DOM reading and selector-based actions without unnecessary screenshots. normal requires screenshots, mouse and keyboard to read and interact with content; it blocks the session\'s DOM tools. Do not switch from normal to fast on your own initiative to work around an error. The mode belongs to this MCP connection; tabs are preserved. normal does not guarantee undetectability and does not undo previous fast actions. With browser_batch chain only actions already verified in this session, with reasonable pauseMs pauses: it is for repeating stable flows, not for exploring; its mechanical cadence is observable by the page and does not guarantee undetectability. Track progress with browser_batch_status and cancel with browser_batch_cancel.';
 let initialized = false;
 const batch = {running: false, steps: [], index: 0, results: [], cancelled: false, stoppedOn: null, finished: null, messageId: null, progressToken: undefined};
 const write = value => process.stdout.write(JSON.stringify(value) + '\n');
@@ -33,17 +33,17 @@ function requestCancelled(message) {
   batch.wake?.();
 }
 async function handle(message) {
-  if (message?.jsonrpc !== '2.0' || typeof message.method !== 'string') return write({jsonrpc: '2.0', id: message?.id ?? null, error: {code: -32600, message: 'Petición inválida'}});
+  if (message?.jsonrpc !== '2.0' || typeof message.method !== 'string') return write({jsonrpc: '2.0', id: message?.id ?? null, error: {code: -32600, message: 'Invalid request'}});
   if (!Object.hasOwn(message, 'id')) return;
   const reply = result => write({jsonrpc: '2.0', id: message.id, result});
   const error = (code, text) => write({jsonrpc: '2.0', id: message.id, error: {code, message: text}});
   if (message.method === 'initialize') {
     initialized = true;
-    return reply({protocolVersion: versions.includes(message.params?.protocolVersion) ? message.params.protocolVersion : versions[0], capabilities: {tools: {listChanged: false}}, serverInfo: {name: 'dialbot-mcp', version: '0.4.4'}, instructions: `Modo inicial: ${mode}. ${instructions} Usa browser_outline para enlaces y menús en fast; browser_activate para activar pestañas; browser_behavior para cursor, movimiento humano y warm-up por prompt. Cursor auto está visible solo en fast; movimiento auto es humano en normal. Warm-up automático desactivado inicialmente. Para adjuntos usa browser_file_inputs y browser_upload en fast, o browser_upload_click tras una captura en normal. Seleccionar archivos puede iniciar su transferencia al sitio; no confirma fin de subida. Comprueba la página y respeta las instrucciones del usuario sobre publicación.`});
+    return reply({protocolVersion: versions.includes(message.params?.protocolVersion) ? message.params.protocolVersion : versions[0], capabilities: {tools: {listChanged: false}}, serverInfo: {name: 'dialbot-mcp', version: '0.4.4'}, instructions: `Initial mode: ${mode}. ${instructions} Use browser_outline for links and menus in fast; browser_activate to activate tabs; browser_behavior for cursor, human motion and warm-up per prompt. Cursor auto is visible only in fast; motion auto is human in normal. Automatic warm-up is initially off. For attachments use browser_file_inputs and browser_upload in fast, or browser_upload_click after a screenshot. Selecting files may start their transfer to the site; it does not confirm upload completion. Check the page and respect the user's instructions about publishing.`});
   }
   if (message.method === 'ping') return reply({});
   if (message.method === 'notifications/cancelled') return requestCancelled(message);
-  if (!initialized) return error(-32002, 'Inicializa la sesión primero');
+  if (!initialized) return error(-32002, 'Initialize the session first');
   if (message.method === 'tools/list') return reply({tools});
   if (message.method === 'tools/call') {
     const {name, arguments: args = {}} = message.params ?? {};
@@ -51,7 +51,7 @@ async function handle(message) {
       validate(name, args);
     } catch (e) {return error(-32602, e.message);}
     if (name === 'browser_mode') {
-      if (args.mode && args.mode !== mode && activeCalls) return reply({isError: true, content: [{type: 'text', text: 'Espera a que terminen las operaciones pendientes antes de cambiar de modo.'}]});
+      if (args.mode && args.mode !== mode && activeCalls) return reply({isError: true, content: [{type: 'text', text: 'Wait for pending operations to finish before switching modes.'}]});
       const previousMode = mode;
       if (args.mode) mode = args.mode;
       let warnings = [];
@@ -60,7 +60,7 @@ async function handle(message) {
     }
     if (name === 'browser_behavior') {
       const changing = Object.keys(args).length > 0;
-      if (changing && activeCalls) return reply({isError: true, content: [{type: 'text', text: 'Espera a que termine la operación antes de cambiar el comportamiento.'}]});
+      if (changing && activeCalls) return reply({isError: true, content: [{type: 'text', text: 'Wait for the running operation to finish before changing behavior.'}]});
       for (const key of ['cursor', 'motion', 'warmup']) if (args[key] !== undefined) preferences[key] = args[key];
       if (args.tabId !== undefined) touchedTabs.add(args.tabId);
       let warnings = [];
@@ -74,15 +74,15 @@ async function handle(message) {
       return reply({content: [{type: 'text', text: JSON.stringify(batchStatus())}]});
     }
     if (name === 'browser_batch') {
-      if (batch.running) return reply({isError: true, content: [{type: 'text', text: 'Ya hay un lote en curso; espera su finalización, consulta con browser_batch_status o cáncelalo con browser_batch_cancel.'}]});
-      if (activeCalls) return reply({isError: true, content: [{type: 'text', text: 'Espera a que terminen las operaciones pendientes antes de iniciar un lote.'}]});
+      if (batch.running) return reply({isError: true, content: [{type: 'text', text: 'A batch is already running; wait for it to finish, check with browser_batch_status or cancel it with browser_batch_cancel.'}]});
+      if (activeCalls) return reply({isError: true, content: [{type: 'text', text: 'Wait for pending operations to finish before starting a batch.'}]});
       batch.progressToken = message.params?._meta?.progressToken;
       batch.messageId = message.id;
       batch.running = true; batch.steps = args.steps; batch.index = 0; batch.results = []; batch.cancelled = false; batch.stoppedOn = null; batch.finished = null;
       runBatch(Date.now(), args.stopOnError ?? true).catch(e => write({jsonrpc: '2.0', id: message.id, error: {code: -32603, message: e.message}}));
       return;
     }
-    if (!availableTools(mode).some(tool => tool.name === name)) return reply({isError: true, content: [{type: 'text', text: `La herramienta ${name} está bloqueada en modo normal. Usa capturas, ratón y teclado. Cambia con browser_mode solo si el usuario lo solicita.`}]});
+    if (!availableTools(mode).some(tool => tool.name === name)) return reply({isError: true, content: [{type: 'text', text: `The tool ${name} is blocked in normal mode. Use screenshots, mouse and keyboard. Switch with browser_mode only if the user asks.`}]});
     activeCalls++;
     try {
       if (args.tabId !== undefined && name !== 'browser_close') touchedTabs.add(args.tabId);
@@ -98,7 +98,7 @@ async function handle(message) {
     } catch (e) {return reply({isError: true, content: [{type: 'text', text: e.message}]});}
     finally {activeCalls--;}
   }
-  error(-32601, 'Método desconocido');
+  error(-32601, 'Method not found');
 }
 function batchStatus() {
   return {running: batch.running, totalSteps: batch.steps.length, stepIndex: batch.index, cancelled: batch.cancelled, results: batch.results.map(entry => ({index: entry.index, name: entry.name, ok: entry.ok, ...(entry.ok ? {result: entry.result} : {error: entry.error})}))};
@@ -143,6 +143,6 @@ async function runBatch(startedAt, stopOnError) {
 const input = readline.createInterface({input: process.stdin, crlfDelay: Infinity});
 input.on('line', line => {
   let message;
-  try {message = JSON.parse(line);} catch {write({jsonrpc: '2.0', id: null, error: {code: -32700, message: 'JSON inválido'}}); return;}
+  try {message = JSON.parse(line);} catch {write({jsonrpc: '2.0', id: null, error: {code: -32700, message: 'Invalid JSON'}}); return;}
   handle(message).catch(e => write({jsonrpc: '2.0', id: message?.id ?? null, error: {code: -32603, message: e.message}}));
 });

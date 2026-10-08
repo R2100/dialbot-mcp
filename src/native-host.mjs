@@ -35,14 +35,14 @@ const server = net.createServer(socket => {
         validate(request.name, request.arguments ?? {});
         if (['browser_upload', 'browser_upload_click'].includes(request.name)) request.arguments.files = localFiles(request.arguments.files);
         const context = request.context ?? {};
-        for (const key of ['cursor', 'humanMotion', 'warmup']) if (context[key] !== undefined && typeof context[key] !== 'boolean') throw new Error('Contexto inválido');
-        if (context.sessionId !== undefined && (typeof context.sessionId !== 'string' || context.sessionId.length > 100)) throw new Error('Sesión inválida');
-        if (pending.size >= 100) throw new Error('Demasiadas operaciones pendientes');
-        if (request.name === 'browser_paste' && [...pending.values()].some(value => value.name === 'browser_paste')) throw new Error('Portapapeles ocupado; espera a que termine el pegado anterior');
+        for (const key of ['cursor', 'humanMotion', 'warmup']) if (context[key] !== undefined && typeof context[key] !== 'boolean') throw new Error('Invalid context');
+        if (context.sessionId !== undefined && (typeof context.sessionId !== 'string' || context.sessionId.length > 100)) throw new Error('Invalid session');
+        if (pending.size >= 100) throw new Error('Too many pending operations');
+        if (request.name === 'browser_paste' && [...pending.values()].some(value => value.name === 'browser_paste')) throw new Error('Clipboard busy; wait for the previous paste to finish');
         const id = randomUUID();
         const timer = setTimeout(() => {
           pending.delete(id);
-          socket.end(JSON.stringify({error: 'Tiempo agotado; comprueba el estado antes de repetir la operación.'}) + '\n');
+          socket.end(JSON.stringify({error: 'Timed out; check the state before repeating the operation.'}) + '\n');
         }, 25000);
         pending.set(id, {socket, timer, name: request.name});
         const send = async () => {
@@ -68,7 +68,7 @@ const decode = nativeDecoder(message => {
   pending.delete(message.id); clearTimeout(request.timer);
   request.socket.end(JSON.stringify({result: message.result, error: message.error}) + '\n');
 });
-server.on('error', error => {console.error('No se pudo abrir el puente:', error.code); process.exit(1);});
+server.on('error', error => {console.error('Could not open the bridge:', error.code); process.exit(1);});
 server.listen(settings.pipe, () => process.stdout.write(nativeFrame({ready: true})));
 process.stdin.on('end', () => {
   for (const socket of sockets) socket.destroy();

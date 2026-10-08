@@ -53,12 +53,12 @@ function keyInfo(key) {
   if (special[key]) return {key: key === 'Space' ? ' ' : key, code: special[key][0], windowsVirtualKeyCode: special[key][1]};
   if (/^[a-z]$/i.test(key)) return {key, code: `Key${key.toUpperCase()}`, windowsVirtualKeyCode: key.toUpperCase().charCodeAt(0)};
   if (/^[0-9]$/.test(key)) return {key, code: `Digit${key}`, windowsVirtualKeyCode: key.charCodeAt(0)};
-  throw new Error(`Tecla no soportada: ${key}`);
+  throw new Error(`Unsupported key: ${key}`);
 }
 export function parseKeys(keys) {
   const parts = keys.split('+');
   const key = parts.pop();
-  if (!key || parts.some(part => !modifierBits[part]) || new Set(parts).size !== parts.length || modifierBits[key]) throw new Error('Usa una tecla o un acorde, por ejemplo Control+A o Shift+Tab');
+  if (!key || parts.some(part => !modifierBits[part]) || new Set(parts).size !== parts.length || modifierBits[key]) throw new Error('Use a key or a chord, for example Control+A or Shift+Tab');
   return {modifiers: parts, key: keyInfo(key)};
 }
 async function sendKeys(cdp, tabId, keys, holdMs = 40) {
@@ -100,7 +100,7 @@ export async function input(cdp, name, args, context = {}) {
     const text = args.text;
     const delay = args.delayMs ?? 40;
     const plan = [...text].map(char => ({char, delay: human && delay > 0 ? logPause(delay, 0, 180) : delay, hold: human ? logPause(25, 12, 55) : 0}));
-    if (plan.length > 200 || plan.reduce((sum, step) => sum + step.delay + step.hold + 10, 0) > 18000) throw new Error('Divide el texto en bloques de hasta 200 caracteres y menos de 18 segundos');
+    if (plan.length > 200 || plan.reduce((sum, step) => sum + step.delay + step.hold + 10, 0) > 18000) throw new Error('Split the text into blocks of up to 200 characters and less than 18 seconds');
     await warmup(cdp, tabId, context);
     for (const {char, delay: gap, hold} of plan) {
       if (char === '\n' || char === '\t') await sendKeys(cdp, tabId, char === '\n' ? 'Enter' : 'Tab', hold);
@@ -119,7 +119,7 @@ export async function input(cdp, name, args, context = {}) {
   }
   const bounds = await viewport(cdp, tabId);
   const targets = name === 'browser_mouse_drag' ? args.points : [{x, y}];
-  if (targets.some(point => !Number.isFinite(point.x) || !Number.isFinite(point.y) || point.x < 0 || point.y < 0 || point.x >= bounds.width || point.y >= bounds.height)) throw new Error('Coordenadas fuera del área visible; usa píxeles CSS desde la esquina superior izquierda');
+  if (targets.some(point => !Number.isFinite(point.x) || !Number.isFinite(point.y) || point.x < 0 || point.y < 0 || point.x >= bounds.width || point.y >= bounds.height)) throw new Error('Coordinates outside the visible area; use CSS pixels from the top-left corner');
   await warmup(cdp, tabId, context);
   if (name === 'browser_mouse_drag') {
     const first = targets[0];

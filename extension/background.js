@@ -18,7 +18,7 @@ function connect() {
       try { current.postMessage(response); } catch {}
     });
     current.onDisconnect.addListener(() => {
-      lastError = chrome.runtime.lastError?.message ?? 'Conexión cerrada';
+      lastError = chrome.runtime.lastError?.message ?? 'Connection closed';
       if (port === current) {port = undefined; ready = false;}
     });
     lastError = '';

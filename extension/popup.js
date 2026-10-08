@@ -10,7 +10,7 @@ function render() {
     state.classList.toggle('ok', connected);
     state.classList.toggle('off', !connected);
   }
-  document.querySelector('#stateText').textContent = connected ? 'Conectado al puente' : 'Desconectado';
+  document.querySelector('#stateText').textContent = connected ? 'Connected to bridge' : 'Disconnected';
   const error = document.querySelector('#error');
   error.hidden = !current.error;
   error.textContent = current.error ?? '';
@@ -24,7 +24,7 @@ document.querySelector('#disconnect').onclick = () => refresh('disconnect');
 document.querySelector('#status').onclick = async event => {
   const status = event.target;
   try {await navigator.clipboard.writeText(current.extensionId ?? '');} catch {}
-  status.textContent = 'Copiado';
+  status.textContent = 'Copied';
   status.classList.add('copied');
   setTimeout(() => {status.classList.remove('copied'); render();}, 900);
 };

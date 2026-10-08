@@ -37,7 +37,7 @@ test('beforeunload cancels navigation without leaving the tab busy', async t => 
   const {execute} = await import('../extension/browser.js');
   await assert.rejects(
     execute('browser_navigate', {tabId: 80, url: 'https://example.test/next'}),
-    /Navegación cancelada: la página tiene cambios sin guardar/
+    /Navigation cancelled: the page has unsaved changes/
   );
   assert.ok(commands.some(({method, params}) => method === 'Page.handleJavaScriptDialog' && params.accept === false));
   assert.deepEqual(await execute('browser_read', {tabId: 80, maxChars: 100}), {title: 'Draft', url: 'https://example.test/draft', text: 'still usable'});

@@ -153,7 +153,7 @@ test('An offscreen intermediate or final point is rejected before warm-up or pre
     forgetPointer(tabId);
     const events = [];
     const path = points.map((point, i) => i === index ? {x: 800, y: point.y} : point);
-    await assert.rejects(input(browser(events), 'browser_mouse_drag', {tabId, points: path}, {warmup: true}), /Coordenadas/);
+    await assert.rejects(input(browser(events), 'browser_mouse_drag', {tabId, points: path}, {warmup: true}), /Coordinates outside/);
     assert.deepEqual(events, []);
   }
 });
