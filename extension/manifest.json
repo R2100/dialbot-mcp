@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Dialbot MCP",
   "description": "Control local del navegador mediante MCP.",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "minimum_chrome_version": "120",
   "permissions": [
     "nativeMessaging",

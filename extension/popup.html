@@ -24,6 +24,8 @@ button:disabled{cursor:default;opacity:.42}
 #disconnect{background:#22364a;color:#dbe6ee}
 #disconnect:not(:disabled):hover{filter:brightness(1.25)}
 footer{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:13px;padding-top:11px;border-top:1px solid #1d3141;font-size:11.5px;color:#7d90a0}
+#github{color:#7fe0b0;text-decoration:none}
+#github:hover{text-decoration:underline}
 #status{overflow-wrap:anywhere;text-align:right;cursor:pointer}
 #status:hover{color:#c9d7e2}
 #status.copied{color:#34d17c}
@@ -36,5 +38,5 @@ footer{display:flex;justify-content:space-between;gap:8px;align-items:center;mar
 <button id="connect">Conectar</button>
 <button id="disconnect">Desconectar</button>
 </div>
-<footer><span>extensionId</span><span id="status" title="Clic para copiar">—</span></footer>
+<footer><a id="github" href="https://github.com/R2100/dialbot-mcp" target="_blank" rel="noreferrer">GitHub</a><span id="status" title="Clic para copiar el ID">—</span></footer>
 <script src="popup.js"></script></body></html>
