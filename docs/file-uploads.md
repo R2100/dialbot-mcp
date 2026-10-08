@@ -54,6 +54,6 @@ Para los tres flujos ya existen lectura o capturas, clic, teclado y activación 
 
 ## Verificación
 
-La integración automatizada recorre MCP, proceso nativo, extensión y Chromium aislado. Comprueba bytes reales recibidos por el servidor local, nombre Unicode, evento change confiable, campo oculto, selección por clic en normal, restricciones de modo, errores de selector/ruta/directorio/múltiples y restauración del selector tras un timeout. Estas pruebas no demuestran por sí solas una subida en un servicio externo.
+Las pruebas automatizadas comprueban la validación de rutas y argumentos locales antes de cualquier acción. La selección de archivos en Chrome y el evento del sitio se verifican manualmente; ninguna prueba local acredita que un servicio externo haya recibido o procesado un archivo.
 
-Después de actualizar, recarga la extensión y reinicia el cliente MCP para obtener las 22 herramientas. No requiere nuevos permisos de Chrome ni instalar dependencias.
+Después de actualizar, recarga la extensión y reinicia el cliente MCP para cargar el catálogo de herramientas actual. No requiere nuevos permisos de Chrome ni instalar dependencias.

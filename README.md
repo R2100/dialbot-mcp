@@ -6,13 +6,27 @@ Estado: prototipo funcional para Windows y Chrome. El puente funciona en el equi
 
 Política de privacidad: [dialbot-mcp](https://r2100.github.io/dialbot-mcp/privacy/).
 
+**Pensado primero para OpenCode.** Lleva a OpenCode un flujo de agente con navegador como el que buscas en ChatGPT/Codex: el agente trabaja sobre tus pestañas de Chrome mediante herramientas MCP locales.
+
+## Instalación asistida desde OpenCode
+
+Con Node.js 22 o posterior y Chrome instalados, puedes pedirle a OpenCode que prepare el servidor MCP local con un prompt. Un agente con acceso autorizado a la terminal y a la configuración de OpenCode puede clonar el proyecto, ejecutar el setup y añadir el servidor MCP sin que tengas que editar la configuración a mano. La extensión de Chrome se carga una vez por separado siguiendo [estos pasos](#instalación-en-modo-desarrollador-descomprimida).
+
+Prompt de ejemplo:
+
+> Instala Dialbot MCP para OpenCode en este equipo desde https://github.com/R2100/dialbot-mcp. Comprueba que tengo Windows y Node.js 22 o posterior; clona el repositorio en una ruta estable, ejecuta `npm run setup` y configura Dialbot como servidor MCP local stdio en mi configuración de OpenCode, usando la ruta absoluta al `src/mcp.mjs`. No reemplaces mi configuración existente. Después, indícame cómo cargar la extensión de Chrome desde la carpeta `extension` y conectarla. Cuando la haya conectado, verifica el estado con `opencode mcp list`.
+
+El setup registra el host local en Windows y crea la credencial privada del puente. Permite al agente ejecutar comandos y modificar la configuración cuando te lo solicite. La extensión sigue siendo un paso separado que se carga en Chrome; el setup del MCP no instala extensiones del navegador.
+
+OpenCode admite servidores MCP locales por stdio ([documentación oficial](https://opencode.ai/docs/mcp-servers/)) y Dialbot incluye ejemplos de configuración para OpenCode v1 y v2 en [`examples`](examples/). También funciona con Pi, probado por el usuario, y con otros harnesses que admitan MCP stdio y puedan ejecutar comandos locales con autorización.
+
 Arquitectura: agente MCP → proceso Node por stdio → tubería local autenticada → proceso nativo → extensión Manifest V3 → pestaña.
 
 ## Instalación en Windows
 
 Requisito: Node 22 o posterior y Chrome.
 
-Descarga o clona el proyecto y abre una terminal en su carpeta. No necesitas `npm install`: el servidor solo usa módulos incluidos en Node.
+Descarga o clona el proyecto y abre una terminal en su carpeta. No necesitas `npm install`: el servidor solo usa módulos incluidos en Node. Si prefieres hacerlo manualmente, ejecuta `npm run setup`, carga la extensión en Chrome y configura el cliente MCP según los ejemplos.
 
 1. Ejecuta `npm run setup` desde este directorio. Genera identidad propia, credencial local y registro del proceso nativo en HKCU.
 2. Carga la extensión en Chrome en modo desarrollador (instrucciones detalladas más abajo).
@@ -59,7 +73,7 @@ extension/     Extensión Manifest V3, interfaz y operaciones del navegador
 src/           Servidor MCP stdio, cliente del puente y proceso nativo
 scripts/       Instalador del proceso nativo para Windows
 examples/      Configuraciones de clientes MCP
-tests/         Pruebas de protocolo e integración con Chromium
+tests/         Pruebas automatizadas del protocolo y componentes
 docs/          Notas técnicas y páginas públicas de GitHub Pages
 extension/icons/ Iconos necesarios para la extensión
 ```
@@ -214,11 +228,9 @@ Puedes pedir «Adjunta este archivo y detente sin publicar». La selección se r
 
 Las revisiones de esta línea se mantienen en **0.4.x**, incrementando el último número con los cambios. Mantén la misma versión en `package.json`, `extension/manifest.json` y `serverInfo` de `src/mcp.mjs`; Chrome muestra la versión cargada de la extensión y MCP informa de la suya al inicializar.
 
-Las decisiones sobre interacción y las comprobaciones de compatibilidad están en [Comportamiento del navegador](docs/browser-behavior.md). Se conserva la identidad de Chrome y se comprueba su estabilidad antes y después de las operaciones; estas comprobaciones no son una certificación contra sistemas antibot.
+Las decisiones de comportamiento y sus límites están en [Comportamiento del navegador](docs/browser-behavior.md). Dialbot no promete indetectabilidad.
 
-`npm test` ejecuta pruebas de protocolo, validación, movimiento y framing. La prueba integral se activa si `PLAYWRIGHT_MODULE` apunta a una instalación existente de playwright-core y `BROWSER_EXECUTABLE` a Chromium con soporte para cargar extensiones por argumentos. Usa un perfil temporal, una tubería y credencial independientes y una página HTTP en loopback; requiere haber ejecutado setup. `DIALBOT_CONFIG` permite seleccionar un archivo de configuración local alternativo para entornos aislados. No instala dependencias.
-
-La prueba integral también verifica foco por coordenadas, clic y doble clic, trazos en canvas, arrastre de un slider, escritura Unicode, inserción de bloques multilínea en textarea y contenteditable, selección con Control+A, borrado, Tab y Enter, rueda e `isTrusted` de los eventos recibidos. El DOM se utiliza en el test como observador para verificar resultados; las nuevas herramientas de entrada no lo inspeccionan. Tras actualizar archivos, recarga la extensión desde el gestor y reinicia el servidor MCP.
+`npm test` ejecuta las pruebas automatizadas del protocolo MCP, framing, validación de argumentos y rutas, modos, lotes, movimiento, cursor, pegado y recuperación. No instala dependencias ni requiere configurar un navegador. La integración completa con la extensión instalada se comprueba manualmente; después de actualizar archivos, recarga la extensión desde Chrome y reinicia el servidor MCP.
 
 ## Desinstalar
 
