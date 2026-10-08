@@ -1,59 +1,59 @@
-# Selección de archivos y subida de medios
+# File selection and media uploads
 
-Dialbot 0.3.0 incorpora tres herramientas genéricas. No necesita un adaptador ni URLs fijas para cada plataforma.
+Dialbot 0.3.0 added three generic tools. It needs no adapter and no fixed URLs per platform.
 
-| Herramienta | Modo | Uso |
+| Tool | Mode | Use |
 | --- | --- | --- |
-| `browser_file_inputs` | fast | Enumera inputs de archivo del documento principal, incluso ocultos, con selector, accept, multiple y disabled. |
-| `browser_upload` | fast | Recibe tabId, selector único y files con rutas absolutas. |
-| `browser_upload_click` | ambos | Recibe tabId, x, y y files; pulsa el botón observado en una captura y responde al selector de archivos de Chrome. |
+| `browser_file_inputs` | fast | Lists file inputs of the main document, even hidden ones, with selector, accept, multiple and disabled. |
+| `browser_upload` | fast | Takes tabId, single selector and files with absolute paths. |
+| `browser_upload_click` | both | Takes tabId, x, y and files; presses the button observed in a screenshot and answers Chrome's file chooser. |
 
-Ejemplo fast, usando el selector devuelto por el listado:
-
-```json
-{"tabId":123,"selector":"input[type=file]","files":["C:/Users/tu-usuario/Documentos/prueba.png"]}
-```
-
-Ejemplo normal, sustituyendo las coordenadas por las de una captura reciente:
+fast example, using the selector returned by the listing:
 
 ```json
-{"tabId":123,"x":240,"y":350,"files":["C:/Users/tu-usuario/Videos/demo.mp4"]}
+{"tabId":123,"selector":"input[type=file]","files":["C:/Users/your-user/Documents/test.png"]}
 ```
 
-Prompt: «Adjunta este archivo en el compositor, espera a ver la miniatura y detente sin publicar». Para normal: «Usa modo normal, localiza el botón de medios en una captura y adjunta este archivo». El agente convierte estas peticiones en llamadas MCP; la extensión no interpreta lenguaje natural.
+normal example, replacing the coordinates with those from a recent screenshot:
 
-## Implementación elegida
+```json
+{"tabId":123,"x":240,"y":350,"files":["C:/Users/your-user/Videos/demo.mp4"]}
+```
 
-El proceso nativo valida que cada ruta sea absoluta, existente, legible y un archivo regular. Se rechazan rutas UNC y directorios. Admite entre uno y diez archivos; el campo debe admitir selección múltiple para recibir más de uno. No inspecciona el contenido ni impone límites de tamaño o códec: corresponden al sitio. Usa únicamente archivos que el usuario haya autorizado enviar a esa página.
+Prompt: "Attach this file in the composer, wait for the thumbnail and stop without publishing". For normal: "Use normal mode, locate the media button in a screenshot and attach this file". The agent turns these requests into MCP calls; the extension does not interpret natural language.
 
-Chrome recibe las rutas mediante `DOM.setFileInputFiles` y se encarga de exponer los archivos al sitio. Los bytes no atraviesan MCP ni se codifican en base64. En fast se resuelve el input por selector; no es necesario que sea visible. En normal, `Page.setInterceptFileChooserDialog` captura el selector generado por el clic de ratón y entrega su backendNodeId, sin buscar selectores ni leer la página. El diálogo de Windows no llega a mostrarse. La interceptación y el listener se retiran en finally, también al fallar. El clic debe abrir el selector en unos segundos; si no lo hace, se devuelve un error y hay que comprobar el estado antes de repetir.
+## Chosen implementation
 
-El resultado `selectionSent: true` significa que Chrome aceptó la selección. `uploadComplete: "unknown"` recuerda que no acredita transferencia, procesamiento ni publicación. El sitio puede vaciar el input al procesar el archivo, por lo que el estado de la página es la comprobación válida. La herramienta no pulsa botones de publicación; entregar archivos ya puede enviarlos al servidor o desencadenar otras acciones propias de la página.
+The native process validates that each path is absolute, existing, readable and a regular file. UNC paths and directories are rejected. It accepts between one and ten files; the field must allow multiple selection to receive more than one. It does not inspect content nor enforces size or codec limits: those belong to the site. Only use files the user has authorized sending to that page.
 
-La selección reemplaza los archivos del input. El sitio puede mantener adjuntos anteriores en su propio estado: revisa la composición antes y después. `accept` se informa como orientación; no se considera una validación definitiva del formato. Los selectores de fast cubren solo el documento principal. No hay soporte garantizado para iframes de otro proceso, shadow DOM, selección de carpetas o selectores que no se basen en input file.
+Chrome receives the paths via `DOM.setFileInputFiles` and is responsible for exposing the files to the site. The bytes do not travel through MCP nor are base64-encoded. In fast the input is resolved by selector; it does not need to be visible. In normal, `Page.setInterceptFileChooserDialog` captures the chooser triggered by the mouse click and gets its backendNodeId, without looking for selectors or reading the page. The Windows dialog never shows up. Interception and the listener are removed in finally, even on failure. The click must open the chooser within a few seconds; if it does not, an error is returned and the state must be checked before retrying.
 
-## Alternativas evaluadas
+The `selectionSent: true` result means Chrome accepted the selection. `uploadComplete: "unknown"` reminds that it does not attest transfer, processing or publication. The site may clear the input while processing the file, so the page state is the valid check. The tool does not press publish buttons; handing over files may already send them to the server or trigger other site actions.
 
-| Técnica | Evaluación |
+The selection replaces the files in the input. The site may keep previous attachments in its own state: review the composition before and after. `accept` is reported as guidance; it is not considered a definitive format validation. fast selectors cover only the main document. There is no guaranteed support for out-of-process iframes, shadow DOM, folder selection or choosers not based on input file.
+
+## Evaluated alternatives
+
+| Technique | Assessment |
 | --- | --- |
-| Asignar una ruta a input.value desde JavaScript | El navegador impide seleccionar archivos locales así. |
-| File + DataTransfer y eventos desde JavaScript | Requiere obtener y transportar los bytes, consume memoria con vídeos y produce eventos sintéticos; no es la vía elegida. |
-| Selector nativo de Chrome mediante CDP | Implementado: transfiere rutas, permite inputs ocultos y conserva el flujo del sitio. |
-| Diálogo de Windows con UI Automation y SendInput | Posible alternativa futura: identificar el diálogo perteneciente a Chrome, rellenar Nombre de archivo y pulsar Abrir. Requiere controlar foco, ventanas, nivel de integridad y tiempos; no implementado. |
-| Arrastrar desde el Explorador | Requiere coordinar dos ventanas y el destino. No aporta ventaja cuando existe un selector de archivos; no implementado. |
+| Assigning a path to input.value from JavaScript | The browser prevents selecting local files this way. |
+| File + DataTransfer and JavaScript events | Requires obtaining and transporting the bytes, consumes memory with videos and produces synthetic events; not the chosen path. |
+| Chrome's native chooser via CDP | Implemented: transfers paths, allows hidden inputs and preserves the site flow. |
+| Windows dialog with UI Automation and SendInput | Possible future alternative: identify the dialog belonging to Chrome, fill File name and press Open. Requires controlling focus, windows, integrity level and timings; not implemented. |
+| Dragging from Explorer | Requires coordinating two windows and the destination. No advantage when a file chooser exists; not implemented. |
 
-## Flujo por plataforma
+## Per-platform flows
 
-En X: abrir el compositor, identificar el control de medios, seleccionar el archivo, esperar miniatura o fin de progreso y detenerse antes de Publicar. Los formatos y límites pueden variar por cuenta y tipo de medio.
+On X: open the composer, identify the media control, select the file, wait for thumbnail or progress end and stop before Publish. Formats and limits may vary by account and media type.
 
-En YouTube Studio: Crear, Subir vídeos, seleccionar archivo, completar detalles y audiencia, esperar transferencia y comprobaciones, revisar visibilidad. Subir y publicar son pasos distintos, pero abandonar el flujo puede dejar un vídeo privado en el canal; no asumir que cerrar equivale a borrar.
+On YouTube Studio: Create, Upload videos, select the file, complete details and audience, wait for upload and checks, review visibility. Uploading and publishing are distinct steps, but abandoning the flow can leave a private video on the channel; do not assume closing equals deleting.
 
-En TikTok: abrir la pantalla de subida de escritorio, seleccionar vídeo, esperar su procesamiento, revisar descripción y privacidad y detenerse antes de publicar. La compatibilidad concreta debe verificarse con la cuenta y el vídeo elegidos.
+On TikTok: open the desktop upload screen, select the video, wait for processing, review description and privacy and stop before publishing. Specific compatibility must be verified with the chosen account and video.
 
-Para los tres flujos ya existen lectura o capturas, clic, teclado y activación de pestañas. La pieza nueva es la selección de archivos. El progreso se consulta con lecturas o capturas sucesivas; las llamadas de selección no permanecen abiertas durante toda la transferencia. No se ha añadido publicación automática ni un sistema genérico para interpretar el porcentaje de cada sitio.
+For the three flows, reading or screenshots, click, keyboard and tab activation already exist. The new piece is file selection. Progress is polled with successive reads or screenshots; selection calls do not stay open during the whole transfer. No automatic publishing nor a generic system interpreting each site's percentage has been added.
 
-## Verificación
+## Verification
 
-Las pruebas automatizadas comprueban la validación de rutas y argumentos locales antes de cualquier acción. La selección de archivos en Chrome y el evento del sitio se verifican manualmente; ninguna prueba local acredita que un servicio externo haya recibido o procesado un archivo.
+Automated tests check local path and argument validation before any action. File selection in Chrome and the site event are verified manually; no local test proves that an external service received or processed a file.
 
-Después de actualizar, recarga la extensión y reinicia el cliente MCP para cargar el catálogo de herramientas actual. No requiere nuevos permisos de Chrome ni instalar dependencias.
+After updating, reload the extension and restart the MCP client to load the current tool catalog. It requires no new Chrome permissions and no dependencies.

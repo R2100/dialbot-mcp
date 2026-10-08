@@ -1,178 +1,178 @@
 # Dialbot MCP
 
-Controla tu navegador desde un agente mediante MCP. Dialbot combina una extensión para Chrome con un puente local en Node: usa el modo **fast** para tareas por selectores y el modo **normal** para trabajar con capturas, teclado y ratón. Cambia de modo desde el prompt sin perder las pestañas.
+Control your browser from an agent through MCP. Dialbot combines a Chrome extension with a local Node bridge: use **fast** mode for selector-based tasks and **normal** mode to work with screenshots, keyboard and mouse. Switch modes from the prompt without losing your tabs.
 
-Estado: prototipo funcional para Windows y Chrome. El puente funciona en el equipo, sin paquetes de terceros ni servicios remotos. Las páginas web que abras pueden usar su propia red. No requiere cuentas de proveedores de IA.
+Status: working prototype for Windows and Chrome. The bridge runs on your machine, with no third-party packages or remote services. The web pages you open may use their own network. It does not require AI provider accounts.
 
-Política de privacidad: [dialbot-mcp](https://r2100.github.io/dialbot-mcp/privacy/).
+Privacy policy: [dialbot-mcp](https://r2100.github.io/dialbot-mcp/privacy/).
 
-**Pensado primero para OpenCode.** Lleva a OpenCode un flujo de agente con navegador como el que buscas en ChatGPT/Codex: el agente trabaja sobre tus pestañas de Chrome mediante herramientas MCP locales.
+**Designed for OpenCode first.** Bring a browser-agent flow, like the one you look for in ChatGPT/Codex, to OpenCode: the agent works on your Chrome tabs through local MCP tools.
 
-## Instalación asistida desde OpenCode
+## Assisted setup from OpenCode
 
-Con Node.js 22 o posterior y Chrome instalados, puedes pedirle a OpenCode que prepare el servidor MCP local con un prompt. Un agente con acceso autorizado a la terminal y a la configuración de OpenCode puede clonar el proyecto, ejecutar el setup y añadir el servidor MCP sin que tengas que editar la configuración a mano. La extensión de Chrome se carga una vez por separado siguiendo [estos pasos](#instalación-en-modo-desarrollador-descomprimida).
+With Node.js 22 or later and Chrome installed, you can ask OpenCode to prepare the local MCP server with a prompt. An agent with authorized access to the terminal and the OpenCode configuration can clone the project, run the setup and add the MCP server without you editing the configuration by hand. The Chrome extension is loaded once separately following [these steps](#developer-mode-install-unpacked).
 
-Prompt de ejemplo:
+Example prompt:
 
-> Instala Dialbot MCP para OpenCode en este equipo desde https://github.com/R2100/dialbot-mcp. Comprueba que tengo Windows y Node.js 22 o posterior; clona el repositorio en una ruta estable, ejecuta `npm run setup` y configura Dialbot como servidor MCP local stdio en mi configuración de OpenCode, usando la ruta absoluta al `src/mcp.mjs`. No reemplaces mi configuración existente. Después, indícame cómo cargar la extensión de Chrome desde la carpeta `extension` y conectarla. Cuando la haya conectado, verifica el estado con `opencode mcp list`.
+> Install Dialbot MCP for OpenCode on this machine from https://github.com/R2100/dialbot-mcp. Check that I have Windows and Node.js 22 or later; clone the repository to a stable path, run `npm run setup`, and configure Dialbot as a local stdio MCP server in my OpenCode configuration, using the absolute path to `src/mcp.mjs`. Do not replace my existing configuration. Then tell me how to load the Chrome extension from the `extension` folder and connect it. Once connected, verify the state with `opencode mcp list`.
 
-El setup registra el host local en Windows y crea la credencial privada del puente. Permite al agente ejecutar comandos y modificar la configuración cuando te lo solicite. La extensión sigue siendo un paso separado que se carga en Chrome; el setup del MCP no instala extensiones del navegador.
+The setup registers the local host on Windows and creates the private bridge credential. It lets the agent run commands and modify the configuration when you ask for it. The extension remains a separate step loaded in Chrome; the MCP setup does not install browser extensions.
 
-OpenCode admite servidores MCP locales por stdio ([documentación oficial](https://opencode.ai/docs/mcp-servers/)) y Dialbot incluye ejemplos de configuración para OpenCode v1 y v2 en [`examples`](examples/). También funciona con Pi, probado por el usuario, y con otros harnesses que admitan MCP stdio y puedan ejecutar comandos locales con autorización.
+OpenCode supports local MCP servers over stdio ([official documentation](https://opencode.ai/docs/mcp-servers/)) and Dialbot includes example configurations for OpenCode v1 and v2 in [`examples`](examples/). It also works with Pi, tested by the author, and with other harnesses that support MCP stdio and can run local commands with authorization.
 
-Arquitectura: agente MCP → proceso Node por stdio → tubería local autenticada → proceso nativo → extensión Manifest V3 → pestaña.
+Architecture: MCP agent → Node process over stdio → authenticated local pipe → native host → Manifest V3 extension → tab.
 
-## Instalación en Windows
+## Windows installation
 
-Requisito: Node 22 o posterior y Chrome.
+Requirement: Node 22 or later and Chrome.
 
-Descarga o clona el proyecto y abre una terminal en su carpeta. No necesitas `npm install`: el servidor solo usa módulos incluidos en Node. Si prefieres hacerlo manualmente, ejecuta `npm run setup`, carga la extensión en Chrome y configura el cliente MCP según los ejemplos.
+Download or clone the project and open a terminal in its folder. You do not need `npm install`: the server only uses modules bundled with Node. If you prefer the manual path, run `npm run setup`, load the extension in Chrome and configure the MCP client using the examples.
 
-1. Ejecuta `npm run setup` desde este directorio. Genera identidad propia, credencial local y registro del proceso nativo en HKCU.
-2. Carga la extensión en Chrome en modo desarrollador (instrucciones detalladas más abajo).
-3. Abre el botón **Dialbot MCP** y pulsa **Conectar**. Solo una instancia de la extensión puede ocupar el puente a la vez.
-4. Configura un servidor MCP stdio en el agente que quieras usar:
+1. Run `npm run setup` from this directory. It generates its own identity, local credential and native host registration in HKCU.
+2. Load the extension in Chrome in developer mode (detailed instructions below).
+3. Open the **Dialbot MCP** button and press **Connect**. Only one extension instance can hold the bridge at a time.
+4. Configure an MCP stdio server in the agent you want to use:
 
 ```json
 {
   "mcpServers": {
     "dialbot-mcp": {
       "command": "node",
-      "args": ["<ruta-del-proyecto>/src/mcp.mjs"]
+      "args": ["<project-path>/src/mcp.mjs"]
     }
   }
 }
 ```
 
-### Instalación en modo desarrollador (descomprimida)
+### Developer mode install (unpacked)
 
-La extensión se carga directamente desde la carpeta `extension` del proyecto:
+The extension is loaded directly from the project's `extension` folder:
 
-1. **Descarga el proyecto.** Clona el repositorio o descarga el ZIP desde GitHub y descomprímelo en una carpeta definitiva (la extensión no debe moverse ni borrarse más tarde: Chrome referencia esa carpeta). Ejemplo: `C:\dialbot-mcp`.
-2. **Abre la página de extensiones.** En Chrome, entra en `chrome://extensions` (o Menú ⋮ → Extensiones → *Gestionar extensiones*).
-3. **Activa el modo de desarrollador.** Pulsa el interruptor «Modo de desarrollador» en la esquina superior derecha de esa página. Aparecerán tres botones adicionales arriba.
-4. **Carga la extensión descomprimida.** Pulsa **Cargar descomprimida**, navega a la carpeta del proyecto y selecciona `<carpeta-del-proyecto>\extension` (la carpeta que contiene `manifest.json`, no la raíz del proyecto). La tarjeta **Dialbot MCP** aparecerá en el listado.
-5. **Fíjala en la barra.** En el menú de la extensión (icono de la pieza 🧩), pulsa el pin junto a Dialbot MCP para tenerla siempre visible.
-6. **Conéctala al puente.** Abre el botón **Dialbot MCP** y pulsa **Conectar**. Debe mostrar un estado de conexión JSON después de haber ejecutado `npm run setup`; si el host nativo no está registrado, la conexión fallará aunque la extensión esté cargada.
+1. **Download the project.** Clone the repository or download the ZIP from GitHub and unpack it in a final folder (the extension must not be moved or deleted later: Chrome references that folder). Example: `C:\dialbot-mcp`.
+2. **Open the extensions page.** In Chrome, go to `chrome://extensions` (or Menu ⋮ → Extensions → *Manage extensions*).
+3. **Enable developer mode.** Toggle «Developer mode» in the top right corner of that page. Three additional buttons appear at the top.
+4. **Load the unpacked extension.** Press **Load unpacked**, navigate to the project folder and select `<project-folder>\extension` (the folder containing `manifest.json`, not the project root). The **Dialbot MCP** card will appear in the list.
+5. **Pin it to the toolbar.** In the extensions menu (puzzle piece icon 🧩), press the pin next to Dialbot MCP to keep it always visible.
+6. **Connect it to the bridge.** Open the **Dialbot MCP** button and press **Connect**. It should show a JSON connection state after you have run `npm run setup`; if the native host is not registered, the connection will fail even though the extension is loaded.
 
-Notas del modo desarrollador:
+Developer mode notes:
 
-- Al recargar la página de extensiones o pulsar **Recargar** (⟳) en la tarjeta de Dialbot tras actualizar archivos del proyecto, la conexión a veces se interrumpe: vuelve a **Conectar** en el botón. El reinicio del servidor MCP no es necesario solo al recargar, pero sí tras reiniciar el PC o Chrome.
-- Si Chrome descarta la extensión al reiniciar (ocurre si desactivas el modo de desarrollador o usas un perfil con políticas restrictivas), repite los pasos 3-4; la configuración del puente en `.local` no se pierde.
-- Con esta carga verás al conectar el aviso de Chrome sobre el depurador en las pestañas controladas; es normal y desaparecerá al desasociar el depurador.
-- La versión mostrada en la tarjeta debe coincidir con `package.json`.
+- When you reload the extensions page or press **Reload** (⟳) on the Dialbot card after updating project files, the connection is sometimes interrupted: press **Connect** again. Restarting the MCP server is not necessary on reload alone, but it is after restarting the PC or Chrome.
+- If Chrome discards the extension on restart (it happens if you disable developer mode or use a profile with restrictive policies), repeat steps 3-4; the bridge configuration in `.local` is not lost.
+- With this load you will see Chrome's debugger notice on controlled tabs when connecting; it is normal and disappears when the debugger is detached.
+- The version shown on the card must match `package.json`.
 
-Sustituye `<ruta-del-proyecto>` por la ruta absoluta donde hayas guardado el proyecto. La envoltura de configuración depende de cada cliente. En `examples` hay configuraciones para OpenCode v1 y v2: combina la que corresponda con tu configuración existente. Otros agentes necesitan un cliente o adaptador que admita MCP stdio. Compatibilidad de protocolo implementada: revisiones 2024-11-05 a 2025-11-25 enumeradas en el servidor; no implementa el transporte HTTP. La conexión con pi.dev ha sido probada por el usuario. Las pruebas automatizadas usan un cliente MCP local; las nuevas funciones deben probarse también desde el agente después de actualizar.
+Replace `<project-path>` with the absolute path where you saved the project. The configuration wrapper depends on each client. In `examples` there are configurations for OpenCode v1 and v2: combine the one that matches with your existing configuration. Other agents need a client or adapter that supports MCP stdio. Implemented protocol compatibility: revisions 2024-11-05 to 2025-11-25 advertised by the server; it does not implement the HTTP transport. The pi.dev connection has been tested by the author. Automated tests use a local MCP client; new features must also be tested from the agent after updating.
 
-El setup genera archivos exclusivos de tu equipo dentro de `.local`, que se excluyen de Git. La clave del manifiesto de la extensión es **pública** y estabiliza su identificador; no es una credencial. El nombre interno del proceso nativo sigue siendo `local.browser.bridge` para mantener la compatibilidad con instalaciones previas.
+The setup generates machine-specific files inside `.local`, which are excluded from Git. The extension manifest key is **public** and stabilizes its identifier; it is not a credential. The native host internal name remains `local.browser.bridge` to keep compatibility with previous installations.
 
-## Estructura
+## Structure
 
 ```text
-extension/     Extensión Manifest V3, interfaz y operaciones del navegador
-src/           Servidor MCP stdio, cliente del puente y proceso nativo
-scripts/       Instalador del proceso nativo para Windows
-examples/      Configuraciones de clientes MCP
-tests/         Pruebas automatizadas del protocolo y componentes
-docs/          Notas técnicas y páginas públicas de GitHub Pages
-extension/icons/ Iconos necesarios para la extensión
+extension/     Manifest V3 extension, UI and browser operations
+src/           MCP stdio server, bridge client and native host
+scripts/       Native host installer for Windows
+examples/      MCP client configurations
+tests/         Automated protocol and component tests
+docs/          Technical notes and public GitHub Pages pages
+extension/icons/ Icons required by the extension
 ```
 
-## Herramientas
+## Tools
 
-El modo predeterminado es **fast**. Se puede cambiar durante la conversación, sin editar configuración ni reiniciar:
+The default mode is **fast**. It can be changed during the conversation, without editing configuration or restarting:
 
-| Modo | Comportamiento |
+| Mode | Behavior |
 | --- | --- |
-| fast | Prioriza lectura DOM y acciones directas por selectores. Capturas y entrada visual siguen disponibles cuando se necesiten. |
-| normal | Usa capturas, ratón y teclado para el contenido. Bloquea lectura y selectores DOM, incluida subida por selector. Permite seleccionar archivos tras un clic por coordenadas y gestionar pestañas. |
+| fast | Prioritizes DOM reading and direct selector actions. Screenshots and visual input remain available when needed. |
+| normal | Uses screenshots, mouse and keyboard for content. Blocks DOM reading and selectors, including selector-based uploads. Allows file selection after a coordinate click and tab management. |
 
-Ejemplos de prompt: «Usa modo fast para rellenar este formulario», «Cambia a normal y continúa solo con visión, teclado y ratón», «Vuelve a fast», «¿Qué modo está activo?». El agente traduce la petición en `browser_mode` con `{"mode":"fast"}`, `{"mode":"normal"}` o `{}` para consultar. No se interpreta el texto del prompt dentro de la extensión: el cliente necesita un agente capaz de invocar herramientas MCP.
+Prompt examples: "Use fast mode to fill this form", "Switch to normal and continue with vision, keyboard and mouse only", "Back to fast", "Which mode is active?". The agent turns the request into `browser_mode` with `{"mode":"fast"}`, `{"mode":"normal"}` or `{}` to query. Prompt text is not interpreted inside the extension: the client needs an agent capable of invoking MCP tools.
 
-El catálogo de herramientas permanece estable para clientes que lo almacenan en caché; el modo limita su ejecución. La respuesta al cambio indica el estado y las herramientas permitidas. Cada proceso MCP mantiene su propio modo y afecta a todas sus pestañas; otros agentes mantienen el suyo, aunque las pestañas del navegador son compartidas. No es un aislamiento entre agentes. El cambio se rechaza mientras haya operaciones pendientes en esa sesión.
+The tool catalog stays stable for clients that cache it; the mode restricts execution. The change response reports the state and allowed tools. Each MCP process keeps its own mode and it affects all its tabs; other agents keep theirs, although browser tabs are shared. It is not an isolation between agents. The change is rejected while pending operations exist in that session.
 
-Normal no garantiza indetectabilidad ni borra acciones previas de fast. No incluye ejecución arbitraria de JavaScript. Si ya tienes `BROWSER_MODE` configurado, solo fija el modo inicial: se admiten fast/normal y los alias antiguos dom/visual. Puedes cambiarlo después con el prompt. Reinicia el servidor una vez para cargar esta actualización; los cambios de modo posteriores son inmediatos.
+Normal does not guarantee undetectability nor undo previous fast actions. It does not include arbitrary JavaScript execution. If you already have `BROWSER_MODE` configured, it only sets the initial mode: fast/normal and the old dom/visual aliases are accepted. You can change it later from the prompt. Restart the server once to load this update; later mode changes are immediate.
 
-| Herramienta | Argumentos principales |
+| Tool | Main arguments |
 | --- | --- |
-| browser_file_inputs | tabId; lista campos de archivo, solo fast |
-| browser_upload | tabId, selector, files (rutas absolutas); solo fast |
-| browser_upload_click | tabId, x, y, files; selector de archivos tras clic, ambos modos |
-| browser_mode | mode opcional: fast o normal; sin argumentos consulta |
-| browser_outline | tabId, offset y limit opcionales; solo fast |
+| browser_file_inputs | tabId; lists file fields, fast only |
+| browser_upload | tabId, selector, files (absolute paths); fast only |
+| browser_upload_click | tabId, x, y, files; file chooser after a click, both modes |
+| browser_mode | optional mode: fast or normal; no arguments queries |
+| browser_outline | tabId, optional offset and limit; fast only |
 | browser_activate | tabId |
-| browser_behavior | cursor, motion, warmup y tabId opcionales; sin argumentos consulta |
+| browser_behavior | optional cursor, motion, warmup and tabId; no arguments queries |
 | browser_warmup | tabId |
-| browser_tabs | ninguno |
-| browser_open | url, active opcional |
+| browser_tabs | none |
+| browser_open | url, optional active |
 | browser_navigate | tabId, url |
 | browser_close | tabId |
-| browser_read | tabId, maxChars opcional |
+| browser_read | tabId, optional maxChars |
 | browser_click | tabId, selector |
 | browser_fill | tabId, selector, text |
 | browser_screenshot | tabId |
 | browser_detach | tabId |
-| browser_mouse_move | tabId, x, y, durationMs opcional |
-| browser_mouse_click | tabId, x, y, button opcional, clickCount opcional |
-| browser_mouse_drag | tabId, points (2–100 puntos x/y), button y durationMs opcionales |
-| browser_scroll | tabId, x, y, deltaY, deltaX opcional |
+| browser_mouse_move | tabId, x, y, optional durationMs |
+| browser_mouse_click | tabId, x, y, optional button, clickCount |
+| browser_mouse_drag | tabId, points (2–100 x/y points), optional button and durationMs |
+| browser_scroll | tabId, x, y, deltaY, optional deltaX |
 | browser_sendkeys | tabId, keys |
-| browser_type | tabId, text, delayMs opcional |
-| browser_paste | tabId, text (hasta 100000 caracteres) |
-| browser_batch | steps (1–20 pasos {name, arguments, pauseMs}), stopOnError opcional |
-| browser_batch_status | ninguno |
-| browser_batch_cancel | ninguno |
+| browser_type | tabId, text, optional delayMs |
+| browser_paste | tabId, text (up to 100000 characters) |
+| browser_batch | steps (1–20 steps {name, arguments, pauseMs}), optional stopOnError |
+| browser_batch_status | none |
+| browser_batch_cancel | none |
 
-### Interacción visual
+### Visual interaction
 
-1. Llama a `browser_screenshot` con el `tabId`. Devuelve PNG y medidas del área visible e imagen.
-2. Localiza visualmente el objetivo. Las coordenadas de entrada son **píxeles CSS desde la esquina superior izquierda del contenido visible**. Si la imagen mide el doble, divide las coordenadas observadas entre dos. Los factores exactos se devuelven en `imagePixelsPerCssPixel`; si tu visor reduce la imagen, considera también ese cambio de tamaño.
-3. Llama a `browser_mouse_click` con `x` e `y` para enfocar. `button` acepta `left`, `right` y `middle`; `clickCount: 2` produce doble clic.
-4. `browser_type` escribe en el foco actual. Por ejemplo: `{"tabId":123,"text":"Hola mundo","delayMs":40}`. No limpia el campo: para reemplazar usa antes `browser_sendkeys` con `keys: "Control+A"`.
-5. `browser_sendkeys` acepta un acorde por llamada: `Enter`, `Tab`, `Shift+Tab`, `Control+A`, `Control+C`, `Control+V`, `Backspace`, `Delete`, `Escape`, `Home`, `End`, `PageUp`, `PageDown` y flechas. Las operaciones de portapapeles están sujetas a las restricciones del navegador. No acepta sintaxis de macros con llaves.
-6. Para desplazar, usa `browser_scroll` con un punto dentro del contenido y `deltaY` positivo hacia abajo. Haz otra captura tras navegar o desplazar antes de reutilizar coordenadas.
+1. Call `browser_screenshot` with the `tabId`. It returns PNG plus viewport and image sizes.
+2. Locate the target visually. Input coordinates are **CSS pixels from the top-left corner of the visible content**. If the image is double size, divide observed coordinates by two. Exact factors are returned in `imagePixelsPerCssPixel`; if your viewer downscales the image, account for that resize too.
+3. Call `browser_mouse_click` with `x` and `y` to focus. `button` accepts `left`, `right` and `middle`; `clickCount: 2` produces a double click.
+4. `browser_type` types into the current focus. For example: `{"tabId":123,"text":"Hello world","delayMs":40}`. It does not clear the field: to replace, use `browser_sendkeys` with `keys: "Control+A"` first.
+5. `browser_sendkeys` accepts one chord per call: `Enter`, `Tab`, `Shift+Tab`, `Control+A`, `Control+C`, `Control+V`, `Backspace`, `Delete`, `Escape`, `Home`, `End`, `PageUp`, `PageDown` and arrows. Clipboard operations are subject to browser restrictions. It does not accept brace macro syntax.
+6. To scroll, use `browser_scroll` with a point inside the content and positive `deltaY` downward. Take another screenshot after navigating or scrolling before reusing coordinates.
 
-### Lotes de acciones verificadas
+### Batches of verified actions
 
-`browser_batch` ejecuta de 2 a 20 acciones ya comprobadas en una sola llamada, sin consultas del agente entre ellas. Cada paso reutiliza la forma habitual `{name, arguments}`; la única novedad es `pauseMs`, la pausa en milisegundos tras cada paso (0 por defecto, 10000 como máximo):
+`browser_batch` runs 2 to 20 already checked actions in a single call, without agent queries between them. Each step reuses the usual `{name, arguments}` shape; the only addition is `pauseMs`, the pause in milliseconds after each step (0 by default, 10000 maximum):
 
 ```json
 {
   "steps": [
     {"name": "browser_fill",  "arguments": {"tabId": 123, "selector": "#email", "text": "a@b.c"}},
-    {"name": "browser_fill",  "arguments": {"tabId": 123, "selector": "#pass", "text": "secreta"}, "pauseMs": 300},
+    {"name": "browser_fill",  "arguments": {"tabId": 123, "selector": "#pass", "text": "secret"}, "pauseMs": 300},
     {"name": "browser_click", "arguments": {"tabId": 123, "selector": "#submit"}, "pauseMs": 1500},
     {"name": "browser_read",  "arguments": {"tabId": 123, "maxChars": 5000}}
   ]
 }
 ```
 
-La respuesta incluye `results` por paso con `ok` y el `result` o `error` de cada uno, más `cancelled`, `stoppedOn` y `elapsedMs`. Todos los pasos se validan contra el catálogo del modo actual antes de ejecutar el primero: un lote rechazado no ejecuta nada. Con `stopOnError` (true por defecto) el primer fallo detiene el lote; los demás pasos no se realizan.
+The response includes per-step `results` with `ok` and each `result` or `error`, plus `cancelled`, `stoppedOn` and `elapsedMs`. All steps are validated against the current mode catalog before the first one runs: a rejected batch executes nothing. With `stopOnError` (true by default) the first failure stops the batch; the remaining steps do not run.
 
-Úsalo solo con selectores, coordenadas y flujo verificados en esta sesión: es un repetidor de secuencias estables, no una forma de explorar. Encaja bien tras preparar un formulario con llamadas individuales y repetirlo después de un solo golpe. El lote se ejecuta en serie y con la cadencia marcada por las pausas; esa cadencia mecánica es un patrón observable por la página: añade pausas razonables y no trates el lote como indetectable. Las pestañas ocupadas y el límite de tiempo por paso conservan su comportamiento usual: un paso lento puede desbordar el tiempo del puente igual que una llamada individual.
+Use it only with selectors, coordinates and flows verified in this session: it is a repeater for stable sequences, not a way to explore. It fits after preparing a form with individual calls and repeating it in one shot. The batch runs in series with the cadence set by the pauses; that mechanical cadence is a pattern observable by the page: add reasonable pauses and do not treat the batch as undetectable. Busy tabs and the per-step time limit keep their usual behavior: a slow step can exceed the bridge timeout just like a single call.
 
-Durante el lote, `browser_batch_status` consulta el paso en curso y los resultados parciales, y `browser_batch_cancel` cancela al terminar el paso que esté ejecutándose, incluida su pausa; ninguna de las dos interrumpe una acción a medio hacer. El estado del último lote queda disponible tras terminar. `browser_screenshot` no puede ser un paso: hazlo antes o después del lote.
+During the batch, `browser_batch_status` queries the running step and partial results, and `browser_batch_cancel` cancels when the step being executed finishes, including its pause; neither interrupts an action in progress. The last batch state remains available after finishing. `browser_screenshot` cannot be a step: take it before or after the batch.
 
-### Insertar bloques grandes de texto
+### Insert large text blocks
 
-`browser_paste` pega el bloque completo con el portapapeles de Windows y `Control+V` de Chrome, en una sola llamada. Está disponible en **fast y normal**, admite hasta 100000 caracteres Unicode y sirve para código o texto multilínea. Primero enfoca el campo o editor; la inserción sustituye la selección actual o se añade en la posición del cursor. Para reemplazar todo el contenido, usa antes `browser_sendkeys` con `Control+A`.
+`browser_paste` pastes the whole block through the Windows clipboard and Chrome's `Control+V` in a single call. It is available in **fast and normal**, supports up to 100000 Unicode characters and suits code or multiline text. Focus the field or editor first; insertion replaces the current selection or is added at the caret. To replace all content, use `browser_sendkeys` with `Control+A` first.
 
 ```json
 {
   "tabId": 123,
-  "text": "function saludo() {\n  return 'Hola 🌍';\n}\n"
+  "text": "function greet() {\n  return 'Hola 🌍';\n}\n"
 }
 ```
 
-Los saltos de línea y la indentación se conservan en campos multilínea; los campos de una sola línea aplican las restricciones de Chrome. El puente coloca el texto en el portapapeles de Windows mediante PowerShell y la extensión envía el acorde `Control+V`, generando el evento nativo `paste`. El texto se entrega por stdin como datos, sin interpretarlo como un comando. El portapapeles del sistema queda con el bloque enviado; los pegados MCP simultáneos se rechazan para evitar mezclarlo entre sesiones. No se ejecuta una tecla Enter ni se envían teclas por carácter. `browser_type` mantiene la escritura carácter a carácter.
+Line breaks and indentation are preserved in multiline fields; single-line fields apply Chrome's restrictions. The bridge places the text on the Windows clipboard through PowerShell and the extension sends the `Control+V` chord, generating the native `paste` event. The text is delivered over stdin as data, not interpreted as a command. The system clipboard keeps the sent block; simultaneous MCP pastes are rejected to avoid mixing it between sessions. No Enter key is pressed and no per-character keys are sent. `browser_type` keeps character-by-character typing.
 
-La respuesta `inserted` cuenta los caracteres enviados a Chrome. El campo debe estar enfocado y ser editable: la página puede cancelar la entrada, limitar su longitud o transformarla, por lo que hay que comprobar el resultado. La selección inicial se respeta; el warm-up opcional ocurre antes de la inserción.
+The `inserted` response counts the characters sent to Chrome. The field must be focused and editable: the page can cancel the input, limit its length or transform it, so check the result. The initial selection is respected; optional warm-up happens before insertion.
 
-### Arrastrar y dibujar
+### Drag and draw
 
-`browser_mouse_drag` pulsa en el primer punto, recorre los siguientes manteniendo el botón y suelta en el último. Funciona en **fast y normal** para sliders, canvas, selección y componentes que responden a eventos de ratón/puntero. Usa coordenadas CSS del viewport obtenidas de una captura reciente; todos los puntos deben estar dentro del área visible.
+`browser_mouse_drag` presses on the first point, moves through the rest holding the button and releases on the last. It works in **fast and normal** for sliders, canvas, selection and components that respond to mouse/pointer events. Use CSS viewport coordinates from a recent screenshot; all points must be inside the visible area.
 
-Para mover un slider basta con dos puntos. Para dibujar, añade esquinas o puntos intermedios:
+Two points are enough to move a slider. To draw, add corners or intermediate points:
 
 ```json
 {
@@ -182,56 +182,56 @@ Para mover un slider basta con dos puntos. Para dibujar, añade esquinas o punto
 }
 ```
 
-Admite de 2 a 100 puntos y los botones `left` (predeterminado), `right` y `middle`. `durationMs` es la duración total del movimiento con el botón pulsado: 600 ms por defecto, de 0 a 10000 ms. El recorrido se divide en tres partes de igual longitud, cada una con una duración aleatoria; las tres duraciones suman el total configurado. Esta distribución se calcula una vez por trazo, incluso si solo hay dos puntos o hay muchos segmentos. El acercamiento inicial, warm-up y pausa de pulsación son adicionales. Incluso con duración cero se envían movimientos intermedios.
+It supports 2 to 100 points and the `left` (default), `right` and `middle` buttons. `durationMs` is the total duration of the movement with the button held: 600 ms by default, from 0 to 10000 ms. The path is divided into three parts of equal length, each with a random duration; the three durations add up to the configured total. This distribution is computed once per stroke, whether it has two points or many segments. The initial approach, warm-up and press pause are additional. Even with zero duration, intermediate movements are sent.
 
-El acercamiento inicial respeta la preferencia de movimiento; durante el trazo se siguen segmentos rectos sin ruido ni sobrepaso para conservar el dibujo. Las pausas compensan el tiempo de envío de las órdenes de Chrome para aproximarse a la duración indicada; un navegador lento puede superar ese objetivo. Cada llamada realiza una pulsación completa y mantiene la pestaña ocupada hasta soltar. Para varios trazos separados, usa varias llamadas. Si falla tras intentar pulsar, se intenta liberar el botón en la última posición conocida; si la conexión o pestaña se pierden no se puede confirmar la liberación. Las órdenes CDP sin respuesta tienen un límite de 5 segundos para permitir la limpieza y evitar un bloqueo permanente de la pestaña. La respuesta confirma el gesto enviado, no el resultado de la aplicación: comprueba una captura posterior.
+The initial approach respects the motion preference; during the stroke it follows straight segments without noise or overshoot to preserve the drawing. Pauses compensate Chrome's command delivery time to approximate the requested duration; a slow browser can exceed that target. Each call performs a complete press and keeps the tab busy until release. For several separate strokes, use several calls. If it fails after pressing, it attempts to release the button at the last known position; if the connection or tab is lost, the release cannot be confirmed. Unresponsive CDP commands have a 5-second limit to allow cleanup and avoid permanently blocking the tab. The response confirms the gesture was sent, not the application result: check a later screenshot.
 
-Esta herramienta no entrega archivos ni datos externos a zonas de drop; ese flujo requiere soporte específico. La compatibilidad con drag and drop HTML5 no se ha verificado.
+This tool does not deliver files or external data to drop zones; that flow requires specific support. HTML5 drag and drop compatibility has not been verified.
 
-Ratón y teclas se envían al navegador mediante su protocolo de entrada: pulsación y liberación, modificadores y rueda. No mueve el cursor físico de Windows ni conoce sus movimientos manuales. La escritura alfanumérica usa eventos de tecla, incluyendo Shift para mayúsculas ASCII; otros caracteres, acentos y emoji usan inserción de texto tipo IME. El intervalo base es configurable, 40 ms por defecto. Se admiten 200 caracteres y un presupuesto de espera de 18 segundos por llamada; divide textos largos.
+Mouse and keys are sent to the browser through its input protocol: press and release, modifiers and wheel. It does not move the physical Windows cursor and does not know your manual movements. Alphanumeric typing uses key events, including Shift for ASCII uppercase; other characters, accents and emoji use IME-like text insertion. The base interval is configurable, 40 ms by default. 200 characters and an 18-second time budget are supported per call; split long texts.
 
-### Listado textual y activación
+### Text outline and activation
 
-«Lista los enlaces y menús de esta página» llama a `browser_outline`: devuelve una representación textual numerada y elementos con nombre, destino, selector y estado abierto/cerrado o deshabilitado. Incluye elementos renderizados fuera del viewport, y omite los ocultos. No abre menús para descubrir su contenido oculto. La paginación usa `offset` y `limit` (100 por defecto, 300 como máximo). Los números son informativos; usa el selector devuelto con `browser_click`. Vuelve a listar después de cambios en la página. Solo cubre el documento principal, sin iframes ni shadow DOM.
+"List the links and menus on this page" calls `browser_outline`: it returns a numbered textual representation with elements' name, destination, selector and open/closed or disabled state. It includes elements rendered outside the viewport and omits hidden ones. It does not open menus to discover their hidden content. Pagination uses `offset` and `limit` (100 by default, 300 maximum). Numbers are informative; use the returned selector with `browser_click`. List again after page changes. It only covers the main document, without iframes or shadow DOM.
 
-«Activa la pestaña 123» llama a `browser_activate` con su `tabId` y enfoca también la ventana correspondiente.
+"Activate tab 123" calls `browser_activate` with its `tabId` and also focuses the corresponding window.
 
-### Mirilla y comportamiento por prompt
+### Crosshair and prompt behavior
 
-`browser_behavior` conserva preferencias por sesión MCP:
+`browser_behavior` keeps preferences per MCP session:
 
-| Opción | Valores | Predeterminado |
+| Option | Values | Default |
 | --- | --- | --- |
-| cursor | auto, on, off | auto: visible en fast, oculta en normal |
-| motion | auto, human, direct | auto: human en normal, direct en fast |
+| cursor | auto, on, off | auto: visible in fast, hidden in normal |
+| motion | auto, human, direct | auto: human in normal, direct in fast |
 | warmup | true, false | false |
 
-Ejemplos: «Activa el cursor visible», «Oculta la mirilla», «Activa movimiento humano y warm-up», «Desactiva el warm-up», «Vuelve al cursor automático». El agente traduce esto a argumentos como `{"cursor":"on","tabId":123}` o `{"motion":"human","warmup":true}`. Un ajuste explícito on/off o human/direct se mantiene al cambiar de modo; auto vuelve a seguir el modo.
+Examples: "Show the cursor", "Hide the crosshair", "Enable human motion and warm-up", "Disable warm-up", "Back to automatic cursor". The agent turns this into arguments like `{"cursor":"on","tabId":123}` or `{"motion":"human","warmup":true}`. An explicit on/off or human/direct setting persists across mode changes; auto follows the mode again.
 
-La mirilla son dos líneas verdes puras, opacas, de un píxel, que abarcan todo el ancho y alto del viewport. Se cruzan en el puntero del agente y siguen únicamente sus movimientos, incluido el arrastre y el warm-up. Mover el ratón físico no desplaza la mirilla. En acciones DOM muestran el centro del elemento. Antes de conocer una posición se muestran en el centro de la pantalla. No interceptan clics. Se aplican a pestañas usadas por la sesión y a nuevas pestañas al actuar sobre ellas; incluye `tabId` para aplicarlas inmediatamente. Se reaplican en la siguiente operación después de navegar. Al salir de la sesión pueden permanecer hasta recargar la página o desactivarlas. Otros agentes comparten la página: prevalece la última configuración aplicada. La superposición modifica el DOM, es observable por la página y aparece en capturas; su activación en normal es explícita.
+The crosshair is two pure, opaque, one-pixel green lines spanning the full width and height of the viewport. They cross at the agent's pointer and follow only its movements, including drag and warm-up. Moving the physical mouse does not move the crosshair. In DOM actions they show the element's center. Before a position is known they appear at the screen center. They do not intercept clicks. They apply to tabs used by the session and to new tabs when acting on them; include `tabId` to apply them immediately. They are reapplied on the next operation after navigating. After the session ends they can persist until the page is reloaded or they are disabled. Other agents share the page: the last applied configuration wins. The overlay modifies the DOM, is observable by the page and appears in screenshots; enabling it in normal is explicit.
 
-El movimiento human usa ruido gaussiano correlacionado, una curva de aceleración y frenado, sobrepaso limitado del objetivo y corrección antes de pulsar. Todas las coordenadas se limitan al viewport y el punto final coincide con el solicitado. Las pausas de movimiento, lectura y pulsación siguen distribuciones lognormales acotadas, no una distribución uniforme. `durationMs` permite fijar la duración de una trayectoria. El modo direct evita el ruido y las esperas de movimiento salvo duración explícita.
+Human motion uses correlated Gaussian noise, an acceleration and braking curve, limited target overshoot and correction before clicking. All coordinates are bounded to the viewport and the final point matches the requested one. Motion, reading and pressing pauses follow bounded lognormal distributions, not a uniform distribution. `durationMs` fixes the duration of a trajectory. The direct mode avoids noise and movement waits unless a duration is explicit.
 
-Warm-up automático hace tres movimientos ociosos desde una esquina y pausas simuladas antes de la primera entrada por sesión y carga de página. No pulsa ni escribe, aunque puede activar efectos hover. Se reinicia tras navegar o recargar. `browser_warmup` lo ejecuta expresamente incluso si el automático está desactivado. En fast, el warm-up puede preceder una acción DOM, pero motion human solo afecta a las herramientas de entrada, no convierte un clic DOM en entrada de ratón. Estas variaciones no se han calibrado contra movimientos humanos ni garantizan indetectabilidad.
+Automatic warm-up makes three idle movements from a corner and simulated pauses before the first input per session and page load. It does not click or type, although it can trigger hover effects. It resets after navigating or reloading. `browser_warmup` runs it explicitly even if the automatic one is disabled. In fast, warm-up may precede a DOM action, but human motion only affects input tools; it does not turn a DOM click into mouse input. These variations have not been calibrated against human movements nor guarantee undetectability.
 
-Esto mejora compatibilidad con interfaces que esperan entrada del navegador, pero no convierte la sesión en indistinguible de una persona ni garantiza evitar detecciones. No hay simulación de un teclado físico con distribución española completa ni automatización de diálogos del sistema o de la barra de direcciones. No modifica señales de automatización. Las operaciones simultáneas en una misma pestaña se rechazan para evitar mezclar pulsaciones; espera la respuesta antes de continuar.
+This improves compatibility with interfaces that expect browser input, but it does not make the session indistinguishable from a person nor guarantee avoiding detections. There is no physical keyboard simulation with a full Spanish layout nor system dialog or address bar automation. It does not modify automation signals. Simultaneous operations on the same tab are rejected to avoid mixing presses; wait for the response before continuing.
 
-Las herramientas DOM opcionales actúan solo sobre el documento principal; no recorren iframes o shadow DOM. La interacción por coordenadas apunta al contenido visible, sin selectores. Abrir y navegar no esperan la carga; repite la captura cuando el documento esté disponible. Si una navegación activa un diálogo `beforeunload` por cambios sin guardar, Dialbot lo cancela para conservarlos, mantiene la página actual y devuelve un error en vez de dejar la pestaña ocupada. Las páginas internas restringen operaciones. La captura y los eventos de entrada adjuntan el depurador; `browser_detach` lo libera. Chrome puede mostrar su aviso de depuración.
+The optional DOM tools act only on the main document; they do not traverse iframes or shadow DOM. Coordinate interaction targets the visible content, without selectors. Open and navigate do not wait for loading; take the screenshot again once the document is available. If a navigation triggers a `beforeunload` dialog from unsaved changes, Dialbot cancels it to preserve them, keeps the current page and returns an error instead of leaving the tab busy. Internal pages restrict operations. Screenshots and input events attach the debugger; `browser_detach` releases it. Chrome may show its debugger notice.
 
-No compartas `.local/config.json`: contiene la credencial del puente. La CSP de la extensión bloquea conexiones de red propias. El permiso de sitios permite actuar sobre las páginas elegidas por el agente. El token autentica procesos locales; no aísla agentes que operan como el mismo usuario. Las acciones pueden modificar páginas o cerrar pestañas.
+Do not share `.local/config.json`: it contains the bridge credential. The extension CSP blocks its own network connections. The site permission allows acting on the pages chosen by the agent. The token authenticates local processes; it does not isolate agents operating as the same user. Actions can modify pages or close tabs.
 
-## Archivos y vídeos
+## Files and videos
 
-Puedes pedir «Adjunta este archivo y detente sin publicar». La selección se realiza mediante Chrome; los bytes del vídeo no pasan por MCP. En fast se usa un selector y en normal un clic observado en una captura. Seleccionar puede iniciar la transferencia al sitio: hay que comprobar la vista previa y el progreso para confirmar el resultado. Consulta [Subida de archivos](docs/file-uploads.md) para ejemplos, alternativas de Windows, limitaciones y flujos de plataformas.
+You can ask "Attach this file and stop without publishing". Selection is done through Chrome; video bytes do not travel through MCP. In fast a selector is used and in normal a click observed in a screenshot. Selecting may start the transfer to the site: check the preview and progress to confirm the result. See [File uploads](docs/file-uploads.md) for examples, Windows alternatives, limitations and platform flows.
 
-## Pruebas
+## Tests
 
-Las revisiones de esta línea se mantienen en **0.4.x**, incrementando el último número con los cambios. Mantén la misma versión en `package.json`, `extension/manifest.json` y `serverInfo` de `src/mcp.mjs`; Chrome muestra la versión cargada de la extensión y MCP informa de la suya al inicializar.
+Releases on this line stay on **0.4.x**, incrementing the last number with changes. Keep the same version in `package.json`, `extension/manifest.json` and the `serverInfo` of `src/mcp.mjs`; Chrome shows the loaded extension version and MCP reports its own on initialization.
 
-Las decisiones de comportamiento y sus límites están en [Comportamiento del navegador](docs/browser-behavior.md). Dialbot no promete indetectabilidad.
+Behavior decisions and their limits are in [Browser behavior](docs/browser-behavior.md). Dialbot does not promise undetectability.
 
-`npm test` ejecuta las pruebas automatizadas del protocolo MCP, framing, validación de argumentos y rutas, modos, lotes, movimiento, cursor, pegado y recuperación. No instala dependencias ni requiere configurar un navegador. La integración completa con la extensión instalada se comprueba manualmente; después de actualizar archivos, recarga la extensión desde Chrome y reinicia el servidor MCP.
+`npm test` runs the automated tests of the MCP protocol, framing, argument and path validation, modes, batches, motion, cursor, paste and recovery. It installs no dependencies and requires no browser configuration. Full integration with the installed extension is verified manually; after updating files, reload the extension from Chrome and restart the MCP server.
 
-## Desinstalar
+## Uninstall
 
-Retira la extensión desde el navegador y elimina exclusivamente la clave `HKCU\Software\Google\Chrome\NativeMessagingHosts\local.browser.bridge`. El directorio `.local` contiene los archivos generados por setup. La extensión original no se modifica.
+Remove the extension from the browser and delete only the `HKCU\Software\Google\Chrome\NativeMessagingHosts\local.browser.bridge` key. The `.local` directory contains the files generated by setup. The original extension is not modified.

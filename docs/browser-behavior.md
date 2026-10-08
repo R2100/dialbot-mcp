@@ -1,18 +1,18 @@
-# Comportamiento del navegador
+# Browser behavior
 
-Dialbot conserva el motor, perfil, red y APIs nativas de Chrome. Las peticiones de las páginas se realizan desde el navegador; el puente local transporta órdenes y resultados.
+Dialbot preserves Chrome's engine, profile, network and native APIs. Page requests are made from the browser; the local bridge carries commands and results.
 
-## Modos de interacción
+## Interaction modes
 
-- **fast** prioriza lectura DOM y acciones mediante selectores.
-- **normal** utiliza capturas, ratón y teclado para interactuar con el contenido, y bloquea las herramientas DOM de la sesión MCP.
+- **fast** prioritizes DOM reading and selector-based actions.
+- **normal** uses screenshots, mouse and keyboard to interact with content, and blocks the MCP session's DOM tools.
 
-Los modos no modifican la identidad del navegador. Cambiar a normal no revierte acciones anteriores ni garantiza evitar detecciones.
+Modes do not modify the browser identity. Switching to normal does not undo previous actions nor guarantees avoiding detection.
 
-La mirilla de diagnóstico es una superposición DOM observable, activada por defecto en fast. En normal se oculta salvo activación explícita. El movimiento humano utiliza ruido gaussiano suavizado, aceleración/frenado y corrección final; el warm-up opcional genera movimientos sin pulsaciones. Sus tiempos están acotados y no constituyen un modelo validado de comportamiento humano.
+The diagnostic crosshair is an observable DOM overlay, enabled by default in fast. In normal it is hidden unless explicitly activated. Human motion uses smoothed Gaussian noise, acceleration/deceleration and final correction; the optional warm-up generates movements without presses. Its timings are bounded and do not constitute a validated human behavior model.
 
-## Pruebas y alcance
+## Tests and scope
 
-Las pruebas automatizadas cubren lógica, validación y protocolo mediante dobles de prueba; la integración completa con Chrome se verifica manualmente. No abarcan todas las superficies del navegador ni certifican compatibilidad con todos los sitios o indetectabilidad frente a servicios externos.
+Automated tests cover logic, validation and protocol with test doubles; full integration with Chrome is verified manually. They do not cover every browser surface nor certify compatibility with every site or undetectability against external services.
 
-Dialbot no incorpora parches de identidad, rotación de perfiles ni resolución de CAPTCHA. La entrada enviada por el navegador no mueve el cursor físico de Windows ni controla los diálogos del sistema.
+Dialbot includes no identity patches, profile rotation or CAPTCHA solving. Browser-driven input does not move the physical Windows cursor nor control system dialogs.
