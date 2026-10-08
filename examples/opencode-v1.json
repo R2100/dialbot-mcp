@@ -1,0 +1,9 @@
+{
+  "mcp": {
+    "dialbot-mcp": {
+      "type": "local",
+      "command": ["node", "<ruta-del-proyecto>/src/mcp.mjs"],
+      "enabled": true
+    }
+  }
+}

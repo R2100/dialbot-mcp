@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Dialbot MCP</title>
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box;margin:0}
+body{font:14px/1.4 system-ui,'Segoe UI',sans-serif;width:320px;padding:18px 18px 14px;background:#10202e;color:#e8eef4}
+header{display:flex;align-items:center;gap:11px;margin-bottom:16px}
+header img{width:40px;height:40px;border-radius:9px;background:#0b1520;padding:3px}
+h1{font-size:16px;font-weight:650}
+header p{font-size:12px;color:#8fa3b3;margin-top:2px}
+.state{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:10px 12px;border:1px solid #24394b;border-radius:9px;background:#0b1722}
+.state .dot{width:9px;height:9px;border-radius:50%;background:#8fa3b3;box-shadow:0 0 0 3px rgba(143,163,179,.14)}
+.state.ok .dot{background:#34d17c;box-shadow:0 0 0 3px rgba(52,209,124,.16);animation:pulse 2s infinite}
+.state.ok{color:#7fe0b0}
+.state.off{color:#b9c8d4}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(52,209,124,.08)}}
+.error{margin-top:9px;padding:9px 11px;border-radius:9px;background:rgba(255,107,113,.1);border:1px solid rgba(255,107,113,.25);color:#ff9ea3;font-size:12.5px;overflow-wrap:anywhere}
+.row{display:flex;gap:9px;margin-top:14px}
+button{flex:1;padding:9px 0;border-radius:9px;border:1px solid transparent;font:600 13.5px system-ui;cursor:pointer;transition:filter .15s,transform .05s}
+button:active{transform:translateY(1px)}
+button:disabled{cursor:default;opacity:.42}
+#connect{background:#2e9f66;color:#fff}
+#connect:not(:disabled):hover{filter:brightness(1.12)}
+#disconnect{background:#22364a;color:#dbe6ee}
+#disconnect:not(:disabled):hover{filter:brightness(1.25)}
+footer{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:13px;padding-top:11px;border-top:1px solid #1d3141;font-size:11.5px;color:#7d90a0}
+#status{overflow-wrap:anywhere;text-align:right;cursor:pointer}
+#status:hover{color:#c9d7e2}
+#status.copied{color:#34d17c}
+</style></head>
+<body>
+<header><img src="icons/icon48.png" alt=""><div><h1>Dialbot MCP</h1><p>Control del navegador por conexión local</p></div></header>
+<div id="state" class="state off"><span class="dot"></span><span id="stateText">Consultando…</span></div>
+<div id="error" class="error" hidden></div>
+<div class="row">
+<button id="connect">Conectar</button>
+<button id="disconnect">Desconectar</button>
+</div>
+<footer><span>extensionId</span><span id="status" title="Clic para copiar">—</span></footer>
+<script src="popup.js"></script></body></html>

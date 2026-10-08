@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Dialbot MCP",
+  "description": "Control local del navegador mediante MCP.",
+  "version": "0.4.3",
+  "minimum_chrome_version": "120",
+  "permissions": [
+    "nativeMessaging",
+    "tabs",
+    "scripting",
+    "debugger",
+    "alarms",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Dialbot MCP",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; connect-src 'none'"
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuQkKfh1yjGq+k5vRaZFHfXlHUhWsoONJKYRjYrDs7QxDTIl9cSXIQaLQshMySyHZXUOie4+pUFTwpOLU0N8VTNu3Gd8JoXGkbzR/shSAMTh0ip8hPDTWt/3xsxeIoLTUI29Z7XFgNTpMl9Tbl9HJ7Z/npDuIVoJVE8oe3CQog+WnEcqH8Ga2MvhadkNbZIjjUiU9IaNLS1do+KI2KpGwCrKPRp63QU2c31y5qson4Eg3y9Ev4nyyxkfTra4e2Ah9VqWJUKgaloGM32ZPW8XLUjM+3ZfMkZhTzxEuwQHovSiMWhCskfzpL6ZPmUKY8j5VAEEFT5WRteiZjDmKJ0oItQIDAQAB"
+}
