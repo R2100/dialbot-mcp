@@ -188,7 +188,7 @@ El acercamiento inicial respeta la preferencia de movimiento; durante el trazo s
 
 Esta herramienta no entrega archivos ni datos externos a zonas de drop; ese flujo requiere soporte específico. La compatibilidad con drag and drop HTML5 no se ha verificado.
 
-Ratón y teclas se envían mediante el protocolo de entrada de Chromium: pulsación y liberación, modificadores y rueda. La página de prueba recibe estos eventos con `isTrusted: true`. No mueve el cursor físico de Windows ni conoce sus movimientos manuales. La escritura alfanumérica usa eventos de tecla, incluyendo Shift para mayúsculas ASCII; otros caracteres, acentos y emoji usan inserción de texto tipo IME. El intervalo base es configurable, 40 ms por defecto. Se admiten 200 caracteres y un presupuesto de espera de 18 segundos por llamada; divide textos largos.
+Ratón y teclas se envían al navegador mediante su protocolo de entrada: pulsación y liberación, modificadores y rueda. No mueve el cursor físico de Windows ni conoce sus movimientos manuales. La escritura alfanumérica usa eventos de tecla, incluyendo Shift para mayúsculas ASCII; otros caracteres, acentos y emoji usan inserción de texto tipo IME. El intervalo base es configurable, 40 ms por defecto. Se admiten 200 caracteres y un presupuesto de espera de 18 segundos por llamada; divide textos largos.
 
 ### Listado textual y activación
 
