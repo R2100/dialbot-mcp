@@ -16,27 +16,31 @@
 <body>
   <p><a href="../">Dialbot MCP</a></p>
   <h1>Privacy Policy</h1>
-  <p class="updated">Updated: October 8, 2026</p>
+  <p class="updated">Updated: October 9, 2026</p>
 
   <p>Dialbot MCP is a Chrome extension and a local MCP bridge for Windows. This policy describes the information the software may handle and who can receive it.</p>
+  <p><strong>In short:</strong> Dialbot sends no page data to the developer and operates no remote data service. The extension and bridge process requests locally. However, the MCP client or AI provider chosen by the user may receive page content, and a website may receive information when the user submits a form or selects a file. Therefore, not every workflow is end-to-end local.</p>
 
   <h2>Information processed</h2>
   <p>When the user or their MCP client invokes a tool, Dialbot may access open tabs and process their addresses and titles, visible text, links, screenshots and the content that is typed in. The file-selection tools receive local paths and make Chrome select the indicated files. The binary content of those files is not transported through the MCP server.</p>
   <p>The local bridge uses a credential generated on the machine to authenticate inter-process communication. The paste feature may temporarily place the requested text on the Windows clipboard.</p>
 
   <h2>How it is transmitted</h2>
-  <p>Control communication happens between the extension, the local bridge process and the MCP client configured by the user. Dialbot does not operate a remote account service, includes no analytics and sends no telemetry to the developer. The extension's Content Security Policy blocks its own network connections.</p>
-  <p>The MCP client and the AI provider the user has chosen may receive page content, screenshots, text or tool results and process them under their own policies. Review the privacy settings of those services before using Dialbot with sensitive information.</p>
-  <p>Selecting a file may start an upload from Chrome to the open web page. That submission is controlled by the website; Dialbot does not perform it as a service. Check the site and the file before selecting.</p>
+  <p>Tool requests and results pass from the extension through Chrome Native Messaging to the companion local bridge, and then over stdio to the MCP client configured by the user. The extension's Content Security Policy blocks its own network connections. Dialbot has no developer-operated server, analytics or telemetry and does not send page data to the developer.</p>
+  <p>The configured MCP client may send the page content, screenshots, text or tool results to the AI provider selected by the user. That processing is governed by the client's and provider's own policies, not by Dialbot. Review their privacy settings before using Dialbot with sensitive information. For end-to-end local processing, use a local MCP client and local AI model.</p>
+  <p>Browser actions still take place on the website. Submitting a form or selecting a file may send information from Chrome to that site; the site controls that transfer. Dialbot does not upload files to its own service. Check the site and the file before selecting or submitting.</p>
 
   <h2>Storage and control</h2>
-  <p>The bridge credential and installation configuration are stored locally in the project's `.local` directory and are not included in the public repository. Dialbot keeps no remote database and maintains no history of the pages. The user controls actions through their MCP client and can disconnect the extension, close the client or uninstall the software.</p>
+  <p>The bridge credential and installation configuration are stored locally in the project's `.local` directory and are not included in the public repository. Chrome local storage remembers the extension's connection preference. Dialbot does not persist page content, screenshots, tool results or a browsing history on its own servers or in its own database. The user controls actions through their MCP client and can disconnect the extension, close the client or uninstall the software.</p>
+
+  <h2>Chrome Web Store Limited Use</h2>
+  <p>Dialbot MCP limits its access, use and transfer of user data to providing its disclosed browser-control features when requested by the user. The extension sends tool inputs and results to the user's local bridge and configured MCP client; it has no developer-operated data service. The developer does not access or sell page data, use it for advertising, or use it for creditworthiness or lending. The user's MCP client or AI provider may process data under its own privacy terms.</p>
 
   <h2>Third-party services</h2>
   <p>These informational pages are hosted on GitHub Pages; the host may process HTTP requests according to the <a href="https://docs.github.com/site-policy/privacy-policies/github-privacy-statement">GitHub Privacy Statement</a>. The use of Chrome, the MCP client, the AI provider and the visited sites is subject to their respective providers' policies.</p>
 
   <h2>Contact</h2>
-  <p>For questions or privacy requests, open an <a href="https://github.com/R2100/dialbot-mcp/issues">issue on GitHub</a>. Do not post personal data, screenshots, credentials or sensitive information there.</p>
+  <p>For questions or privacy requests, email <a href="mailto:support@r2100.com">support@r2100.com</a> or open an <a href="https://github.com/R2100/dialbot-mcp/issues">issue on GitHub</a>. Do not post personal data, screenshots, credentials or sensitive information in public issues.</p>
 
   <p><a href="https://github.com/R2100/dialbot-mcp">Repository and installation guide</a></p>
 </body>
