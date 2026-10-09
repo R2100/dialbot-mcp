@@ -38,5 +38,5 @@
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'none'; connect-src 'none'"
   },
-  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuQkKfh1yjGq+k5vRaZFHfXlHUhWsoONJKYRjYrDs7QxDTIl9cSXIQaLQshMySyHZXUOie4+pUFTwpOLU0N8VTNu3Gd8JoXGkbzR/shSAMTh0ip8hPDTWt/3xsxeIoLTUI29Z7XFgNTpMl9Tbl9HJ7Z/npDuIVoJVE8oe3CQog+WnEcqH8Ga2MvhadkNbZIjjUiU9IaNLS1do+KI2KpGwCrKPRp63QU2c31y5qson4Eg3y9Ev4nyyxkfTra4e2Ah9VqWJUKgaloGM32ZPW8XLUjM+3ZfMkZhTzxEuwQHovSiMWhCskfzpL6ZPmUKY8j5VAEEFT5WRteiZjDmKJ0oItQIDAQAB"
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqiOxLkw4HoruWkzRRu5SodmWJ8HpqtMCNYB7iZtvDaz22UTiXiRh1o2VoFt6otobV1hlGlGnzkNUOzSMQH22YJMoPEmcjYcRBBik9ic+HYd2lt911awIHQJNm1Tgf4EtOv2BNAU8yaSPKuaLT+QRiowrkHy3sWu4W+S0MVWv/RzkC+lhbl6PD6yWlq/EaN/QSzEzjfvzuDchnncd5Zt8fGSFMa937syfLy5+RlHJSh3qiILVhla/mNzAuX8l2/LEX3hprT5K/6+5tsUTeaRg/OlK7qFJhR6pNnPHWPHWkYvkL9Nfd7mKyIsaaiX36zQOr/IL47iOz1Zwg37K+ggOVwIDAQAB"
 }
