@@ -14,9 +14,9 @@ With Node.js 22 or later and Chrome installed, you can ask OpenCode to prepare t
 
 Example prompt:
 
-> Install Dialbot MCP for OpenCode on this machine from https://github.com/R2100/dialbot-mcp. Check that I have Windows and Node.js 22 or later; clone the repository to a stable path, run `npm run setup`, and configure Dialbot as a local stdio MCP server in my OpenCode configuration, using the absolute path to `src/mcp.mjs`. Do not replace my existing configuration. Then tell me how to load the Chrome extension from the `extension` folder and connect it. Once connected, verify the state with `opencode mcp list`.
+> Install Dialbot MCP for OpenCode on this machine from https://github.com/R2100/dialbot-mcp. Check that I have Windows and Node.js 22 or later; clone the repository to a stable path, run `npm run setup`, and configure Dialbot as a local stdio MCP server in my OpenCode configuration, using the absolute path to `src/mcp.mjs`. Do not replace my existing configuration. Then tell me how to load the Chrome extension from the `extension` folder and connect it. Once connected, call the `browser_tabs` tool to verify that the extension-to-bridge connection works.
 
-The setup registers the local host on Windows and creates the private bridge credential. It lets the agent run commands and modify the configuration when you ask for it. The extension remains a separate step loaded in Chrome; the MCP setup does not install browser extensions.
+The setup registers the local host on Windows and creates the private bridge credential. It lets the agent run commands and modify the configuration when you ask for it. The extension remains a separate step loaded in Chrome; the MCP setup does not install browser extensions. `opencode mcp list` only confirms that OpenCode started the MCP server; it can report the server as connected even when the Chrome extension is not connected. Verify the full chain by calling `browser_tabs` after pressing **Connect** in the extension popup.
 
 OpenCode supports local MCP servers over stdio ([official documentation](https://opencode.ai/docs/mcp-servers/)) and Dialbot includes example configurations for OpenCode v1 and v2 in [`examples`](examples/). It also works with Pi, tested by the author, and with other harnesses that support MCP stdio and can run local commands with authorization.
 
@@ -43,6 +43,8 @@ Download or clone the project and open a terminal in its folder. You do not need
   }
 }
 ```
+
+After loading the extension and pressing **Connect**, ask the agent to call `browser_tabs`. A successful result confirms that the MCP server, native host and extension are connected. If it returns “Bridge unavailable”, check that the extension is loaded, the popup says **Connected to bridge**, and `npm run setup` completed successfully.
 
 ### Developer mode install (unpacked)
 
