@@ -33,7 +33,14 @@ Real examples of Dialbot MCP in action:
 </tr>
 </table>
 
-More examples are shown below, including a filled questionnaire and a live view of this GitHub README with the agent crosshair enabled.
+### More Examples
+
+<table>
+<tr>
+<td valign="top" width="50%"><strong>Fill and submit a questionnaire</strong><br><img src="assets/promo/questionnaire-filled.png" alt="Completed questionnaire with the Dialbot MCP crosshair" width="560"><br><sub>Fast selector actions fill the form and submit it locally.</sub></td>
+<td valign="top" width="50%"><strong>Review this GitHub README</strong><br><img src="assets/promo/github-readme-crosshair.png" alt="Dialbot MCP GitHub README with the green agent crosshair" width="560"><br><sub>The agent reads and reviews its own README with the crosshair visible.</sub></td>
+</tr>
+</table>
 
 OpenCode supports local MCP servers over stdio ([official documentation](https://opencode.ai/docs/mcp-servers/)) and Dialbot includes example configurations for OpenCode v1 and v2 in [`examples`](examples/). It also works with Pi, tested by the author, and with other harnesses that support MCP stdio and can run local commands with authorization.
 
