@@ -37,8 +37,8 @@ Real examples of Dialbot MCP in action:
 
 <table>
 <tr>
-<td valign="top" width="50%"><strong>Fill and submit a questionnaire</strong><br><img src="assets/promo/questionnaire-filled.png" alt="Completed questionnaire with the Dialbot MCP crosshair" width="560"><br><sub>Fast selector actions fill the form and submit it locally.</sub></td>
-<td valign="top" width="50%"><strong>Review this GitHub README</strong><br><img src="assets/promo/github-readme-crosshair.png" alt="Dialbot MCP GitHub README with the green agent crosshair" width="560"><br><sub>The agent reads and reviews its own README with the crosshair visible.</sub></td>
+<td valign="top" width="50%"><strong>Fill and submit a questionnaire</strong><br><img src="assets/promo/questionnaire-filled.gif" alt="Questionnaire filled and submitted with Dialbot MCP" width="560"><br><sub>Fast selector actions fill the form and submit it locally.</sub></td>
+<td valign="top" width="50%"><strong>Review this GitHub README</strong><br><img src="assets/promo/github-readme-crosshair.gif" alt="Dialbot MCP GitHub README reviewed with the green agent crosshair" width="560"><br><sub>The agent reads and reviews its own README with the crosshair visible.</sub></td>
 </tr>
 </table>
 
