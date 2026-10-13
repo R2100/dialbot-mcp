@@ -10,9 +10,7 @@ Privacy policy: [dialbot-mcp](https://r2100.github.io/dialbot-mcp/privacy/).
 
 ## Assisted setup from OpenCode
 
-Install the [Dialbot MCP extension from the Chrome Web Store](https://chromewebstore.google.com/detail/dialbot-mcp/ikofdolfhljanggnajgcgdkmaifmgkkh). This is the only browser extension you need. You need Chrome and Node.js 22 or later.
-
-Then ask OpenCode to install and configure the local MCP bridge:
+Ask OpenCode to install and configure the local MCP bridge:
 
 ```text
 Install Dialbot MCP from https://github.com/R2100/dialbot-mcp
@@ -20,11 +18,13 @@ Install Dialbot MCP from https://github.com/R2100/dialbot-mcp
 
 Follow the installation instructions OpenCode provides for the local bridge and MCP server. OpenCode may ask for permission to run commands and edit its configuration; review those steps before approving them.
 
+Then install the [Dialbot MCP extension from the Chrome Web Store](https://chromewebstore.google.com/detail/dialbot-mcp/ikofdolfhljanggnajgcgdkmaifmgkkh). This is the only browser extension you need. You need Chrome and Node.js 22 or later.
+
 The setup registers the local host on Windows and creates the private bridge credential. The extension and local bridge are separate components: installing the extension alone does not install the bridge.
 
 ## See It In Action
 
-These promotional demos use real browser input through Dialbot MCP:
+Real examples of Dialbot MCP in action:
 
 <table>
 <tr>
@@ -32,6 +32,8 @@ These promotional demos use real browser input through Dialbot MCP:
 <td valign="top" width="50%"><strong>Handwriting drawn by the agent</strong><br><img src="assets/promo/dialbot-handwriting.gif" alt="It works written by Dialbot MCP" width="560"></td>
 </tr>
 </table>
+
+More examples are shown below, including a filled questionnaire and a live view of this GitHub README with the agent crosshair enabled.
 
 OpenCode supports local MCP servers over stdio ([official documentation](https://opencode.ai/docs/mcp-servers/)) and Dialbot includes example configurations for OpenCode v1 and v2 in [`examples`](examples/). It also works with Pi, tested by the author, and with other harnesses that support MCP stdio and can run local commands with authorization.
 
