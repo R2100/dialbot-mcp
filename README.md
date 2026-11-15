@@ -6,6 +6,8 @@ Status: working prototype for Windows and Chrome. The bridge runs on your machin
 
 Privacy policy: [dialbot-mcp](https://r2100.github.io/dialbot-mcp/privacy/).
 
+If you find Dialbot useful, you can [support its development via PayPal](https://www.paypal.me/dialbot). Contributions are optional.
+
 **Works with OpenCode and Codex.** Bring a browser-agent flow to your agent: it works on your Chrome tabs through local MCP tools.
 
 ## Assisted setup from your agent
