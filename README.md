@@ -6,17 +6,17 @@ Status: working prototype for Windows and Chrome. The bridge runs on your machin
 
 Privacy policy: [dialbot-mcp](https://r2100.github.io/dialbot-mcp/privacy/).
 
-**Designed for OpenCode first.** Bring a browser-agent flow, like the one you look for in ChatGPT/Codex, to OpenCode: the agent works on your Chrome tabs through local MCP tools.
+**Works with OpenCode and Codex.** Bring a browser-agent flow to your agent: it works on your Chrome tabs through local MCP tools.
 
-## Assisted setup from OpenCode
+## Assisted setup from your agent
 
-Ask OpenCode to install and configure the local MCP bridge:
+Ask OpenCode or Codex (ChatGPT) to install and configure the local MCP bridge:
 
 ```text
 Install Dialbot MCP from https://github.com/R2100/dialbot-mcp
 ```
 
-Follow the installation instructions OpenCode provides for the local bridge and MCP server. OpenCode may ask for permission to run commands and edit its configuration; review those steps before approving them.
+Follow the installation instructions your agent provides for the local bridge and MCP server. It may ask for permission to run commands and edit its configuration; review those steps before approving them.
 
 Then install the [Dialbot MCP extension from the Chrome Web Store](https://chromewebstore.google.com/detail/dialbot-mcp/ikofdolfhljanggnajgcgdkmaifmgkkh). This is the only browser extension you need. You need Chrome and Node.js 22 or later.
 
@@ -40,7 +40,7 @@ Real examples of Dialbot MCP in action:
 </tr>
 </table>
 
-OpenCode supports local MCP servers over stdio ([official documentation](https://opencode.ai/docs/mcp-servers/)) and Dialbot includes example configurations for OpenCode v1 and v2 in [`examples`](examples/). It also works with Pi, tested by the author, and with other harnesses that support MCP stdio and can run local commands with authorization.
+Dialbot has been tested with OpenCode, Pi, and Codex (ChatGPT) on Windows. OpenCode supports local MCP servers over stdio ([official documentation](https://opencode.ai/docs/mcp-servers/)) and Dialbot includes example configurations for OpenCode v1 and v2 in [`examples`](examples/). Other harnesses can work if they support MCP stdio and can run local commands with authorization.
 
 Architecture: MCP agent → Node process over stdio → authenticated local pipe → native host → Manifest V3 extension → tab.
 
