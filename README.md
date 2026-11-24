@@ -1,5 +1,7 @@
 # Dialbot MCP
 
+[![R2100/dialbot-mcp MCP server](https://glama.ai/mcp/servers/R2100/dialbot-mcp/badges/score.svg)](https://glama.ai/mcp/servers/R2100/dialbot-mcp)
+
 Control your browser from an agent through MCP. Dialbot combines a Chrome extension with a local Node bridge: use **fast** mode for selector-based tasks and **normal** mode to work with screenshots, keyboard and mouse. Switch modes from the prompt without losing your tabs.
 
 Status: working prototype for Windows and Chrome. The bridge runs on your machine, with no third-party packages or remote services. The web pages you open may use their own network. It does not require AI provider accounts.
@@ -21,6 +23,12 @@ Follow the installation instructions your agent provides for the local bridge an
 Then install the [Dialbot MCP extension from the Chrome Web Store](https://chromewebstore.google.com/detail/dialbot-mcp/ikofdolfhljanggnajgcgdkmaifmgkkh). This is the only browser extension you need. You need Chrome and Node.js 22 or later.
 
 The setup registers the local host on Windows and creates the private bridge credential. The extension and local bridge are separate components: installing the extension alone does not install the bridge.
+
+### Directory listings and installation limits
+
+Find Dialbot on [Glama](https://glama.ai/mcp/servers/R2100/dialbot-mcp), [mcpservers.org](https://mcpservers.org/servers/r2100/dialbot-mcp), and [Launch MCP](https://launchmcp.co/mcp/servers/R2100/dialbot-mcp). The free [Agensi skill](https://www.agensi.io/skills/dialbot-mcp-browser-control) provides instructions, not the extension or bridge.
+
+Dialbot controls Chrome on your **Windows computer over local stdio**. Directory badges, generated configs and “Deploy” or “Try in Browser” buttons do not replace local setup or establish compatibility with hosted containers. Follow this guide; do not assume a remote endpoint or one-click installation is supported.
 
 ## See It In Action
 
@@ -51,7 +59,7 @@ Requirement: Node 22 or later and Chrome.
 Download or clone the project and open a terminal in its folder. You do not need `npm install`: the server only uses modules bundled with Node. If you prefer the manual path, run `npm run setup`, load the extension in Chrome and configure the MCP client using the examples.
 
 1. Run `npm run setup` from this directory. It generates its own identity, local credential and native host registration in HKCU.
-2. Load the extension in Chrome in developer mode (detailed instructions below).
+2. Install the [Chrome Web Store extension](https://chromewebstore.google.com/detail/dialbot-mcp/ikofdolfhljanggnajgcgdkmaifmgkkh), or use the unpacked developer-mode installation below. Use only one instance.
 3. Open the **Dialbot MCP** button and press **Connect**. Only one extension instance can hold the bridge at a time.
 4. Configure an MCP stdio server in the agent you want to use:
 
@@ -65,6 +73,8 @@ Download or clone the project and open a terminal in its folder. You do not need
   }
 }
 ```
+
+Replace `<project-path>` with the absolute path to your downloaded project before using this configuration. The JSON only starts the MCP server; it does not install the extension or register the native host. Do not paste bridge credentials into a directory form or public configuration.
 
 ### Developer mode install (unpacked)
 
